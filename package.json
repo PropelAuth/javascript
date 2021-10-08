@@ -1,10 +1,10 @@
 {
-  "name": "@propelauth/javascript-draft",
+  "name": "@propelauth/javascript",
   "repository": {
     "type": "git",
     "url": "https://github.com/PropelAuth/javascript"
   },
-  "version": "1.0.5",
+  "version": "1.0.0",
   "keywords": [
     "auth",
     "user",
