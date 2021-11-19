@@ -3,12 +3,16 @@ export function currentTimeSeconds() {
 }
 
 export function hasLocalStorage(): boolean {
-    return typeof localStorage !== 'undefined'
+    return typeof localStorage !== "undefined"
+}
+
+export function hasWindow(): boolean {
+    return typeof window !== "undefined"
 }
 
 export function getLocalStorageNumber(key: string): number | null {
     if (!hasLocalStorage()) {
-        return null;
+        return null
     }
 
     const value = localStorage.getItem(key)

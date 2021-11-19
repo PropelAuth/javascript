@@ -1,5 +1,5 @@
 import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
-import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage } from "./helpers"
+import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
@@ -294,11 +294,13 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         }
     }
 
-    window.addEventListener("storage", onStorageChange)
+    if (hasWindow()) {
+        window.addEventListener("storage", onStorageChange)
 
-    if (authOptions.enableBackgroundTokenRefresh) {
-        client.getAuthenticationInfoOrNull()
-        clientState.refreshInterval = window.setInterval(client.getAuthenticationInfoOrNull, 60000)
+        if (authOptions.enableBackgroundTokenRefresh) {
+            client.getAuthenticationInfoOrNull()
+            clientState.refreshInterval = window.setInterval(client.getAuthenticationInfoOrNull, 60000)
+        }
     }
 
     return client
