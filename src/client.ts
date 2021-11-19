@@ -1,5 +1,5 @@
 import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
-import { currentTimeSeconds, getLocalStorageNumber } from "./helpers"
+import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage } from "./helpers"
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
@@ -268,6 +268,12 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     }
 
     const onStorageChange = async function () {
+        // If localStorage isn't available, nothing to do here.
+        // This usually happens in frameworks that have some SSR components
+        if (!hasLocalStorage()) {
+            return
+        }
+
         const loggedOutAt = getLocalStorageNumber(LOGGED_OUT_AT_KEY)
         const loggedInAt = getLocalStorageNumber(LOGGED_IN_AT_KEY)
 
