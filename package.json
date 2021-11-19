@@ -1,5 +1,6 @@
 {
   "name": "@propelauth/javascript",
+  "description": "A library for managing authentication in the browser, backed by PropelAuth",
   "repository": {
     "type": "git",
     "url": "https://github.com/PropelAuth/javascript"
