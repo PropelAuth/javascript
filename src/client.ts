@@ -294,8 +294,15 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         }
     }
 
+    // If we were offline or on a different tab, when we return, refetch auth info
+    const onOnlineOrFocus = async function () {
+        await forceRefreshToken(true)
+    }
+
     if (hasWindow()) {
         window.addEventListener("storage", onStorageChange)
+        window.addEventListener("online", onOnlineOrFocus)
+        window.addEventListener("focus", onOnlineOrFocus)
 
         if (authOptions.enableBackgroundTokenRefresh) {
             client.getAuthenticationInfoOrNull()
