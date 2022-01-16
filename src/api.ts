@@ -2,8 +2,18 @@ import { OrgIdToOrgMemberInfo, UserRole } from "./org"
 
 export type User = {
     userId: string
+
     email: string
+    emailConfirmed: boolean,
+
     username?: string
+    firstName?: string,
+    lastName?: string,
+    pictureUrl?: string,
+
+    locked: boolean,
+    enabled: boolean,
+    mfaEnabled: boolean,
 }
 
 export type AuthenticationInfo = {
@@ -109,6 +119,16 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.orgIdToOrgMemberInfo = value
         } else if (key === "user_id") {
             this.userId = value
+        } else if (key === "email_confirmed") {
+            this.emailConfirmed = value
+        } else if (key === "first_name") {
+            this.firstName = value
+        } else if (key === "last_name") {
+            this.lastName = value
+        } else if (key === "picture_url") {
+            this.pictureUrl = value
+        } else if (key === "mfa_enabled") {
+            this.mfaEnabled = value
         } else {
             return value
         }
