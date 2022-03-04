@@ -5,7 +5,7 @@
     "type": "git",
     "url": "https://github.com/PropelAuth/javascript"
   },
-  "version": "1.2.0",
+  "version": "1.2.1",
   "keywords": [
     "auth",
     "user",
