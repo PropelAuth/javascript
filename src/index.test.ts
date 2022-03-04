@@ -3,7 +3,7 @@
  */
 import { createClient } from "./index"
 import { ok, ResponseStatus, setupMockXMLHttpRequest, UnauthorizedResponse, UnknownErrorResponse } from "./mockxhr.test"
-import { OrgIdToOrgMemberInfo, UserRole } from "./org"
+import { OrgIdToOrgMemberInfo } from "./org"
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
@@ -130,17 +130,17 @@ test("client parses org information correctly", async () => {
         "922c5c21-be96-484f-9383-ee532dd79d02": {
             orgId: "922c5c21-be96-484f-9383-ee532dd79d02",
             orgName: "ninetwotwo",
-            userRole: UserRole.Owner,
+            userRoleName: "Owner",
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             orgId: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
             orgName: "effcdee",
-            userRole: UserRole.Admin,
+            userRoleName: "Admin",
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
             orgId: "da5903d3-5696-4e4b-920b-bc429b2f75ab",
             orgName: "deeafive",
-            userRole: UserRole.Member,
+            userRoleName: "Member",
         }
     }
 

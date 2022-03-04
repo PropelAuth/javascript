@@ -1,14 +1,8 @@
 export type OrgMemberInfo = {
     orgId: string
     orgName: string
-    userRole: UserRole
+    userRoleName: string
 }
 export type OrgIdToOrgMemberInfo = {
     [orgId: string]: OrgMemberInfo
-}
-
-export enum UserRole {
-    Member = 0,
-    Admin = 1,
-    Owner = 2,
 }

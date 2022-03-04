@@ -1,5 +1,4 @@
 export type { AuthenticationInfo, User } from "./api"
 export { createClient } from "./client"
 export type { IAuthClient, IAuthOptions } from "./client"
-export { UserRole } from "./org"
 export type { OrgIdToOrgMemberInfo, OrgMemberInfo } from "./org"
