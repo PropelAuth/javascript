@@ -48,6 +48,12 @@ export function fetchAuthenticationInfo(authUrl: string): Promise<Authentication
                     }
                 } else if (status === 401) {
                     resolve(null)
+                } else if (status === 0) {
+                    logCorsError()
+                    reject({
+                        status: 503,
+                        message: "Unable to process authentication response",
+                    })
                 } else {
                     reject({
                         status,
@@ -79,6 +85,12 @@ export function logout(authUrl: string): Promise<LogoutResponse> {
                 if (status >= 200 && status < 300) {
                     const jsonResponse = JSON.parse(http.responseText)
                     resolve(jsonResponse)
+                } else if (status === 0) {
+                    logCorsError()
+                    reject({
+                        status: 503,
+                        message: "Unable to process authentication response",
+                    })
                 } else {
                     console.error("Logout error", http.status, http.responseText)
                     reject({
@@ -137,4 +149,12 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
 
 function toUserRole(userRole: string): UserRole {
     return UserRole[userRole as keyof typeof UserRole]
+}
+
+function logCorsError() {
+    console.error(
+        "Request to PropelAuth failed due to a CORS error. There are a few likely causes: \n" +
+        " 1. In the Frontend Integration section of your dashboard, make sure your requests are coming either the specified Application URL or localhost with a matching port.\n" +
+        " 2. Make sure your server is hosted on HTTPS in production."
+    )
 }
