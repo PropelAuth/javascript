@@ -1,6 +1,7 @@
 export type OrgMemberInfo = {
     orgId: string
     orgName: string
+    urlSafeOrgName: string
     userRole: UserRole
 }
 export type OrgIdToOrgMemberInfo = {

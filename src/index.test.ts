@@ -113,16 +113,19 @@ test("client parses org information correctly", async () => {
         "922c5c21-be96-484f-9383-ee532dd79d02": {
             org_id: "922c5c21-be96-484f-9383-ee532dd79d02",
             org_name: "ninetwotwo",
+            url_safe_org_name: "ninetwotwo",
             user_role: "Owner",
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             org_id: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
             org_name: "effcdee",
+            url_safe_org_name: "effcdee",
             user_role: "Admin",
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
             org_id: "da5903d3-5696-4e4b-920b-bc429b2f75ab",
             org_name: "deeafive",
+            url_safe_org_name: "deeafive",
             user_role: "Member",
         },
     }
@@ -130,16 +133,19 @@ test("client parses org information correctly", async () => {
         "922c5c21-be96-484f-9383-ee532dd79d02": {
             orgId: "922c5c21-be96-484f-9383-ee532dd79d02",
             orgName: "ninetwotwo",
+            urlSafeOrgName: "ninetwotwo",
             userRole: UserRole.Owner,
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             orgId: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
             orgName: "effcdee",
+            urlSafeOrgName: "effcdee",
             userRole: UserRole.Admin,
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
             orgId: "da5903d3-5696-4e4b-920b-bc429b2f75ab",
             orgName: "deeafive",
+            urlSafeOrgName: "deeafive",
             userRole: UserRole.Member,
         }
     }
@@ -149,6 +155,7 @@ test("client parses org information correctly", async () => {
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.orgIdToOrgMemberInfo).toStrictEqual(typeScriptOrgIdToOrgMemberInfo)
+    expect(authenticationInfo?.orgHelper.getOrgs()).toStrictEqual(Object.values(typeScriptOrgIdToOrgMemberInfo))
     expectCorrectEndpointWasHit(mockHttp, "https://www.example.com/api/v1/refresh_token")
 })
 
@@ -449,6 +456,7 @@ interface ApiUser {
 export type ApiOrgMemberInfo = {
     org_id: string
     org_name: string
+    url_safe_org_name: string
     user_role: string
 }
 export type ApiOrgIdToOrgMemberInfo = {

@@ -1,4 +1,5 @@
 import { OrgIdToOrgMemberInfo, UserRole } from "./org"
+import {getOrgHelper, OrgHelper} from "./OrgHelper";
 
 export type User = {
     userId: string
@@ -19,6 +20,12 @@ export type User = {
 export type AuthenticationInfo = {
     accessToken: string
     expiresAtSeconds: number
+    orgHelper: OrgHelper,
+
+    /**
+     * You should prefer orgHelper to orgIdToOrgMemberInfo.
+     * orgHelper provides useful abstractions over this mapping
+     */
     orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
     user: User
 }
@@ -121,6 +128,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.orgId = value
         } else if (key === "org_name") {
             this.orgName = value
+        } else if (key === "url_safe_org_name") {
+            this.urlSafeOrgName = value
         } else if (key === "user_role") {
             this.userRole = toUserRole(value)
         } else if (key === "access_token") {
@@ -129,6 +138,7 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.expiresAtSeconds = value
         } else if (key === "org_id_to_org_member_info") {
             this.orgIdToOrgMemberInfo = value
+            this.orgHelper = getOrgHelper(value)
         } else if (key === "user_id") {
             this.userId = value
         } else if (key === "email_confirmed") {
