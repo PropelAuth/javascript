@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { v4 as uuidv4 } from "uuid"
-import { getOrgHelper, ORG_SELECTION_LOCAL_STORAGE_KEY } from "./OrgHelper"
+import { getOrgHelper } from "./org_helper"
 
 beforeEach(() => {
     const localStorageMock = (function () {

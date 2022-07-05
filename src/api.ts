@@ -1,5 +1,5 @@
 import { OrgIdToOrgMemberInfo, UserRole } from "./org"
-import {getOrgHelper, OrgHelper} from "./OrgHelper";
+import {getOrgHelper, OrgHelper} from "./org_helper";
 
 export type User = {
     userId: string
