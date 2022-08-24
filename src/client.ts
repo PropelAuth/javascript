@@ -1,9 +1,10 @@
-import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
-import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
+import {AuthenticationInfo, fetchAuthenticationInfo, logout} from "./api"
+import {currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow} from "./helpers"
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
-const STALE_AUTH_INFO_THRESHOLD_SECS = 4 * 60
+const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 4 * 60
+const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 4 * 60
 
 export interface IAuthClient {
     /**
@@ -88,6 +89,7 @@ interface ClientState {
     lastLoggedInAtMessage: number | null
     lastLoggedOutAtMessage: number | null
     refreshInterval: number | null
+    lastRefresh: number | null
     readonly authUrl: string
 }
 
@@ -118,6 +120,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         lastLoggedOutAtMessage: getLocalStorageNumber(LOGGED_OUT_AT_KEY),
         authUrl: authOptions.authUrl,
         refreshInterval: null,
+        lastRefresh: null,
     }
 
     // Helper functions
@@ -165,6 +168,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             updateLastLoggedInAt()
         }
 
+        clientState.lastRefresh = currentTimeSeconds()
         clientState.initialLoadFinished = true
     }
 
@@ -214,7 +218,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             } else if (!clientState.authenticationInfo) {
                 return await forceRefreshToken(false)
             } else if (
-                currentTimeSecs + STALE_AUTH_INFO_THRESHOLD_SECS >
+                currentTimeSecs + AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS >
                 clientState.authenticationInfo.expiresAtSeconds
             ) {
                 // Small edge case: If we were being proactive
@@ -295,8 +299,13 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     }
 
     // If we were offline or on a different tab, when we return, refetch auth info
+    // Some browsers trigger focus more often than we'd like, so we'll debounce a little here as well
     const onOnlineOrFocus = async function () {
-        await forceRefreshToken(true)
+        if (clientState.lastRefresh && currentTimeSeconds() > clientState.lastRefresh + DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS) {
+            await forceRefreshToken(true)
+        } else {
+            await client.getAuthenticationInfoOrNull()
+        }
     }
 
     if (hasWindow()) {
