@@ -6,6 +6,14 @@ const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
 const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 4 * 60
 const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 4 * 60
 
+export interface RedirectToSignupOptions {
+    postSignupRedirectUrl: string
+}
+
+export interface RedirectToLoginOptions {
+    postLoginRedirectUrl: string
+}
+
 export interface IAuthClient {
     /**
      * If the user is logged in, this method returns an access token, the time (in seconds) that the token will expire,
@@ -28,12 +36,12 @@ export interface IAuthClient {
     /**
      * Redirects the user to the signup page.
      */
-    redirectToSignupPage(): void
+    redirectToSignupPage(options?: RedirectToSignupOptions): void
 
     /**
      * Redirects the user to the login page.
      */
-    redirectToLoginPage(): void
+    redirectToLoginPage(options?: RedirectToLoginOptions): void
 
     /**
      * Redirects the user to the account page.
@@ -230,12 +238,22 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
         },
 
-        redirectToSignupPage(): void {
-            window.location.href = `${clientState.authUrl}/signup`
+        redirectToSignupPage(options?: RedirectToSignupOptions): void {
+            let qs = ""
+            if (options && options.postSignupRedirectUrl) {
+                const encode = window ? window.btoa : btoa;
+                qs = new URLSearchParams({"rt": encode(options.postSignupRedirectUrl)}).toString()
+            }
+            window.location.href = `${clientState.authUrl}/signup?${qs}`
         },
 
-        redirectToLoginPage(): void {
-            window.location.href = `${clientState.authUrl}/login`
+        redirectToLoginPage(options?: RedirectToLoginOptions): void {
+            let qs = ""
+            if (options && options.postLoginRedirectUrl) {
+                const encode = window ? window.btoa : btoa;
+                qs = new URLSearchParams({"rt": encode(options.postLoginRedirectUrl)}).toString()
+            }
+            window.location.href = `${clientState.authUrl}/login?${qs}`
         },
 
         redirectToAccountPage(): void {
