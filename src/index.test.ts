@@ -3,7 +3,7 @@
  */
 import { createClient } from "./index"
 import { ok, ResponseStatus, setupMockXMLHttpRequest, UnauthorizedResponse, UnknownErrorResponse } from "./mockxhr.test"
-import { OrgIdToOrgMemberInfo, UserRole } from "./org"
+import { OrgIdToOrgMemberInfo } from "./org"
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
@@ -115,18 +115,24 @@ test("client parses org information correctly", async () => {
             org_name: "ninetwotwo",
             url_safe_org_name: "ninetwotwo",
             user_role: "Owner",
+            user_roles: ["Owner", "Admin", "Member"],
+            user_permissions: ["View", "Edit", "Delete", "ManageAccess"],
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             org_id: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
             org_name: "effcdee",
             url_safe_org_name: "effcdee",
             user_role: "Admin",
+            user_roles: ["Admin", "Member"],
+            user_permissions: ["View", "Edit", "Delete"],
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
             org_id: "da5903d3-5696-4e4b-920b-bc429b2f75ab",
             org_name: "deeafive",
             url_safe_org_name: "deeafive",
             user_role: "Member",
+            user_roles: ["Member"],
+            user_permissions: ["View"],
         },
     }
     const typeScriptOrgIdToOrgMemberInfo: OrgIdToOrgMemberInfo = {
@@ -134,19 +140,25 @@ test("client parses org information correctly", async () => {
             orgId: "922c5c21-be96-484f-9383-ee532dd79d02",
             orgName: "ninetwotwo",
             urlSafeOrgName: "ninetwotwo",
-            userRole: UserRole.Owner,
+            userAssignedRole: "Owner",
+            userRoles: ["Owner", "Admin", "Member"],
+            userPermissions: ["View", "Edit", "Delete", "ManageAccess"],
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             orgId: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
             orgName: "effcdee",
             urlSafeOrgName: "effcdee",
-            userRole: UserRole.Admin,
+            userAssignedRole: "Admin",
+            userRoles: ["Admin", "Member"],
+            userPermissions: ["View", "Edit", "Delete"],
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
             orgId: "da5903d3-5696-4e4b-920b-bc429b2f75ab",
             orgName: "deeafive",
             urlSafeOrgName: "deeafive",
-            userRole: UserRole.Member,
+            userAssignedRole: "Member",
+            userRoles: ["Member"],
+            userPermissions: ["View"],
         }
     }
 

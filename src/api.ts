@@ -1,4 +1,4 @@
-import { OrgIdToOrgMemberInfo, UserRole } from "./org"
+import { OrgIdToOrgMemberInfo } from "./org"
 import {getOrgHelper, OrgHelper} from "./org_helper";
 
 export type User = {
@@ -131,7 +131,11 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
         } else if (key === "url_safe_org_name") {
             this.urlSafeOrgName = value
         } else if (key === "user_role") {
-            this.userRole = toUserRole(value)
+            this.userAssignedRole = value
+        } else if (key === "user_roles") {
+            this.userRoles = value
+        } else if (key === "user_permissions") {
+            this.userPermissions = value
         } else if (key === "access_token") {
             this.accessToken = value
         } else if (key === "expires_at_seconds") {
@@ -155,10 +159,6 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             return value
         }
     })
-}
-
-function toUserRole(userRole: string): UserRole {
-    return UserRole[userRole as keyof typeof UserRole]
 }
 
 function logCorsError() {

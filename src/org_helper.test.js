@@ -78,17 +78,14 @@ function createOrg() {
         orgId: uuidv4(),
         orgName,
         urlSafeOrgName,
-        userRole: choose(["Owner", "Admin", "Member"]),
+        userAssignedRole: "Admin",
+        userRoles: ["Admin", "Member"],
+        userPermissions: [],
     }
 }
 
 function randomString() {
     return (Math.random() + 1).toString(36).substring(3)
-}
-
-function choose(choices) {
-    const index = Math.floor(Math.random() * choices.length)
-    return choices[index]
 }
 
 // https://stackoverflow.com/questions/8024149/is-it-possible-to-get-the-non-enumerable-inherited-property-names-of-an-object
