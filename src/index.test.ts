@@ -470,6 +470,8 @@ export type ApiOrgMemberInfo = {
     org_name: string
     url_safe_org_name: string
     user_role: string
+    user_roles: string[]
+    user_permissions: string[]
 }
 export type ApiOrgIdToOrgMemberInfo = {
     [org_id: string]: ApiOrgMemberInfo
