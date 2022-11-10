@@ -3,7 +3,7 @@ export type OrgMemberInfo = {
     orgName: string
     urlSafeOrgName: string
     userAssignedRole: string
-    userRoles: string[]
+    userInheritedRolesPlusCurrentRole: string[]
     userPermissions: string[]
 }
 export type OrgIdToOrgMemberInfo = {

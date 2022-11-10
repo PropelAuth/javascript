@@ -1,5 +1,6 @@
 import { OrgIdToOrgMemberInfo } from "./org"
 import {getOrgHelper, OrgHelper} from "./org_helper";
+import {getAccessHelper, AccessHelper} from "./access_helper";
 
 export type User = {
     userId: string
@@ -20,7 +21,8 @@ export type User = {
 export type AuthenticationInfo = {
     accessToken: string
     expiresAtSeconds: number
-    orgHelper: OrgHelper,
+    orgHelper: OrgHelper
+    accessHelper: AccessHelper
 
     /**
      * You should prefer orgHelper to orgIdToOrgMemberInfo.
@@ -29,6 +31,7 @@ export type AuthenticationInfo = {
     orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
     user: User
 }
+
 
 export type LogoutResponse = {
     redirect_to: string
@@ -132,8 +135,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.urlSafeOrgName = value
         } else if (key === "user_role") {
             this.userAssignedRole = value
-        } else if (key === "user_roles") {
-            this.userRoles = value
+        } else if (key === "inherited_user_roles_plus_current_role") {
+            this.userInheritedRolesPlusCurrentRole = value
         } else if (key === "user_permissions") {
             this.userPermissions = value
         } else if (key === "access_token") {
@@ -143,6 +146,7 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
         } else if (key === "org_id_to_org_member_info") {
             this.orgIdToOrgMemberInfo = value
             this.orgHelper = getOrgHelper(value)
+            this.accessHelper = getAccessHelper(value)
         } else if (key === "user_id") {
             this.userId = value
         } else if (key === "email_confirmed") {

@@ -115,7 +115,7 @@ test("client parses org information correctly", async () => {
             org_name: "ninetwotwo",
             url_safe_org_name: "ninetwotwo",
             user_role: "Owner",
-            user_roles: ["Owner", "Admin", "Member"],
+            inherited_user_roles_plus_current_role: ["Owner", "Admin", "Member"],
             user_permissions: ["View", "Edit", "Delete", "ManageAccess"],
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
@@ -123,7 +123,7 @@ test("client parses org information correctly", async () => {
             org_name: "effcdee",
             url_safe_org_name: "effcdee",
             user_role: "Admin",
-            user_roles: ["Admin", "Member"],
+            inherited_user_roles_plus_current_role: ["Admin", "Member"],
             user_permissions: ["View", "Edit", "Delete"],
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
@@ -131,7 +131,7 @@ test("client parses org information correctly", async () => {
             org_name: "deeafive",
             url_safe_org_name: "deeafive",
             user_role: "Member",
-            user_roles: ["Member"],
+            inherited_user_roles_plus_current_role: ["Member"],
             user_permissions: ["View"],
         },
     }
@@ -141,7 +141,7 @@ test("client parses org information correctly", async () => {
             orgName: "ninetwotwo",
             urlSafeOrgName: "ninetwotwo",
             userAssignedRole: "Owner",
-            userRoles: ["Owner", "Admin", "Member"],
+            userInheritedRolesPlusCurrentRole: ["Owner", "Admin", "Member"],
             userPermissions: ["View", "Edit", "Delete", "ManageAccess"],
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
@@ -149,7 +149,7 @@ test("client parses org information correctly", async () => {
             orgName: "effcdee",
             urlSafeOrgName: "effcdee",
             userAssignedRole: "Admin",
-            userRoles: ["Admin", "Member"],
+            userInheritedRolesPlusCurrentRole: ["Admin", "Member"],
             userPermissions: ["View", "Edit", "Delete"],
         },
         "da5903d3-5696-4e4b-920b-bc429b2f75ab": {
@@ -157,7 +157,7 @@ test("client parses org information correctly", async () => {
             orgName: "deeafive",
             urlSafeOrgName: "deeafive",
             userAssignedRole: "Member",
-            userRoles: ["Member"],
+            userInheritedRolesPlusCurrentRole: ["Member"],
             userPermissions: ["View"],
         }
     }
@@ -470,7 +470,7 @@ export type ApiOrgMemberInfo = {
     org_name: string
     url_safe_org_name: string
     user_role: string
-    user_roles: string[]
+    inherited_user_roles_plus_current_role: string[]
     user_permissions: string[]
 }
 export type ApiOrgIdToOrgMemberInfo = {
