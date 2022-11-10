@@ -3,6 +3,7 @@
  */
 import { v4 as uuidv4 } from "uuid"
 import { getOrgHelper } from "./org_helper"
+import { createOrgs, createOrgIdToOrgMemberInfo, getAllProperties } from "./test_helper"
 
 beforeEach(() => {
     const localStorageMock = (function () {
@@ -54,54 +55,3 @@ it("getter methods work", async () => {
         expect(orgHelper.getOrgByName(uuidv4())).toBeFalsy()
     }
 })
-
-function createOrgIdToOrgMemberInfo(orgs) {
-    let orgIdToOrgMemberInfo = {}
-    for (let org of orgs) {
-        orgIdToOrgMemberInfo[org.orgId] = org
-    }
-    return orgIdToOrgMemberInfo
-}
-
-function createOrgs(numOrgs) {
-    let orgs = []
-    for (let i = 0; i < numOrgs; i++) {
-        orgs.push(createOrg())
-    }
-    return orgs
-}
-
-function createOrg() {
-    const orgName = randomString()
-    const urlSafeOrgName = orgName.toLowerCase()
-    return {
-        orgId: uuidv4(),
-        orgName,
-        urlSafeOrgName,
-        userRole: choose(["Owner", "Admin", "Member"]),
-    }
-}
-
-function randomString() {
-    return (Math.random() + 1).toString(36).substring(3)
-}
-
-function choose(choices) {
-    const index = Math.floor(Math.random() * choices.length)
-    return choices[index]
-}
-
-// https://stackoverflow.com/questions/8024149/is-it-possible-to-get-the-non-enumerable-inherited-property-names-of-an-object
-function getAllProperties(obj) {
-    let allProps = [],
-        curr = obj
-    do {
-        const props = Object.getOwnPropertyNames(curr)
-        props.forEach(function (prop) {
-            if (allProps.indexOf(prop) === -1) {
-                allProps.push(prop)
-            }
-        })
-    } while ((curr = Object.getPrototypeOf(curr)))
-    return allProps
-}
