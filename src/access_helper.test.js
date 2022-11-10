@@ -4,7 +4,7 @@
 import { getAccessHelper } from "./access_helper"
 import { createOrgs, createOrgIdToOrgMemberInfo } from "./test_helper"
  
-it("access helper validate methods work", async () => {
+it("accessHelper validate methods work", async () => {
     const orgs = createOrgs(1)
     const orgId = orgs[0].orgId
     const fakeOrgId = "fakeOrgId"
@@ -44,4 +44,29 @@ it("access helper validate methods work", async () => {
     expect(accessHelper.hasAllPermissions(orgId, ["read", "delete"])).toBeFalsy()
     expect(accessHelper.hasAllPermissions(orgId, ["write", "delete"])).toBeFalsy()
     expect(accessHelper.hasAllPermissions(orgId, ["read", "write", "delete"])).toBeFalsy()
+})
+
+it("accessHelper validate wrapper methods work", async () => {
+    const orgs = createOrgs(1)
+    const orgId = orgs[0].orgId
+    const fakeOrgId = "fakeOrgId"
+    const orgIdToOrgMemberInfo = createOrgIdToOrgMemberInfo(orgs)
+
+    const accessHelper = getAccessHelper(orgIdToOrgMemberInfo)
+    const accessHelperWrapper = accessHelper.getAccessHelperWithOrgId(orgId)
+    const accessHelperWrapperBad = accessHelper.getAccessHelperWithOrgId(fakeOrgId)
+
+    // we do most of the testing in the above test, this is just to make sure the wrapper methods work
+    expect(accessHelperWrapper.isRole("Admin")).toBeTruthy()
+    expect(accessHelperWrapper.isRole("Member")).toBeFalsy()
+    expect(accessHelperWrapper.isAtLeastRole("Owner")).toBeFalsy()
+    expect(accessHelperWrapper.isAtLeastRole("Member")).toBeTruthy()
+    expect(accessHelperWrapper.hasPermission("read")).toBeTruthy()
+    expect(accessHelperWrapper.hasPermission("delete")).toBeFalsy()
+    expect(accessHelperWrapper.hasAllPermissions(["read"])).toBeTruthy()
+    expect(accessHelperWrapper.hasAllPermissions(["delete"])).toBeFalsy()
+    expect(accessHelperWrapper.hasAllPermissions(["read", "write"])).toBeTruthy()
+    expect(accessHelperWrapper.hasAllPermissions(["read", "delete"])).toBeFalsy()
+    expect(accessHelperWrapper.hasAllPermissions(["read", "write", "delete"])).toBeFalsy()
+    expect(accessHelperWrapperBad.isRole("Admin")).toBeFalsy()
 })
