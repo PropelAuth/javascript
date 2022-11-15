@@ -1,4 +1,4 @@
-import { OrgIdToOrgMemberInfo } from "./org"
+import {OrgIdToOrgMemberInfo} from "./org"
 import {getOrgHelper, OrgHelper} from "./org_helper";
 import {getAccessHelper, AccessHelper} from "./access_helper";
 
@@ -8,6 +8,8 @@ export type User = {
     email: string
     emailConfirmed: boolean,
 
+    hasPassword: boolean,
+
     username?: string
     firstName?: string,
     lastName?: string,
@@ -16,6 +18,11 @@ export type User = {
     locked: boolean,
     enabled: boolean,
     mfaEnabled: boolean,
+
+    createdAt: number,
+    lastActiveAt: number,
+
+    legacyUserId?: string
 }
 
 export type AuthenticationInfo = {
@@ -159,6 +166,14 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.pictureUrl = value
         } else if (key === "mfa_enabled") {
             this.mfaEnabled = value
+        } else if (key === "has_password") {
+            this.hasPassword = value
+        } else if (key === "created_at") {
+            this.createdAt = value
+        } else if (key === "last_active_at") {
+            this.lastActiveAt = value
+        } else if (key === "legacy_user_id") {
+            this.legacyUserId = value
         } else {
             return value
         }
