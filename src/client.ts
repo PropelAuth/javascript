@@ -154,13 +154,17 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     function updateLastLoggedOutAt() {
         const loggedOutAt = currentTimeSeconds()
         clientState.lastLoggedOutAtMessage = loggedOutAt
-        localStorage.setItem(LOGGED_OUT_AT_KEY, String(loggedOutAt))
+        if (hasLocalStorage()) {
+            localStorage.setItem(LOGGED_OUT_AT_KEY, String(loggedOutAt))
+        }
     }
 
     function updateLastLoggedInAt() {
         const loggedInAt = currentTimeSeconds()
         clientState.lastLoggedInAtMessage = loggedInAt
-        localStorage.setItem(LOGGED_IN_AT_KEY, String(loggedInAt))
+        if (hasLocalStorage()) {
+            localStorage.setItem(LOGGED_IN_AT_KEY, String(loggedInAt))
+        }
     }
 
     function setAuthenticationInfoAndUpdateDownstream(authenticationInfo: AuthenticationInfo | null) {
