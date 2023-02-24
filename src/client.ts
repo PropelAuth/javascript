@@ -34,6 +34,37 @@ export interface IAuthClient {
     logout(redirectAfterLogout: boolean): Promise<void>
 
     /**
+     * Gets the URL for the hosted signup page.
+     */
+    getSignupPageUrl(options?: RedirectToSignupOptions): string
+
+    /**
+     * Gets the URL for the hosted login page.
+     */
+    getLoginPageUrl(options?: RedirectToLoginOptions): string
+
+    /**
+     * Gets the URL for the hosted account page.
+     */
+    getAccountPageUrl(): string
+
+    /**
+     * Gets the URL for the hosted organization page.
+     * @param orgId The ID of the organization's page to load. If not specified, a random one will be used instead.
+     */
+    getOrgPageUrl(orgId?: string): string
+
+    /**
+     * Gets the URL for the hosted create organization page.
+     */
+    getCreateOrgPageUrl(): string
+
+    /**
+     * Gets the URL for the hosted SAML configuration page.
+     */
+    getSetupSAMLPageUrl(orgId: string): string
+
+    /**
      * Redirects the user to the signup page.
      */
     redirectToSignupPage(options?: RedirectToSignupOptions): void
@@ -58,6 +89,12 @@ export interface IAuthClient {
      * Redirects the user to the create organization page.
      */
     redirectToCreateOrgPage(): void
+
+    /**
+     * Redirects the user to the SAML configuration page.
+     */
+    redirectToSetupSAMLPage(orgId: string): void
+
 
     /**
      * Adds an observer which is called whenever the users logs in or logs out.
@@ -242,38 +279,66 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
         },
 
-        redirectToSignupPage(options?: RedirectToSignupOptions): void {
+        getSignupPageUrl(options?: RedirectToSignupOptions): string {
             let qs = ""
             if (options && options.postSignupRedirectUrl) {
                 const encode = window ? window.btoa : btoa;
                 qs = new URLSearchParams({"rt": encode(options.postSignupRedirectUrl)}).toString()
             }
-            window.location.href = `${clientState.authUrl}/signup?${qs}`
+            return `${clientState.authUrl}/signup?${qs}`
         },
 
-        redirectToLoginPage(options?: RedirectToLoginOptions): void {
+        getLoginPageUrl(options?: RedirectToLoginOptions): string {
             let qs = ""
             if (options && options.postLoginRedirectUrl) {
                 const encode = window ? window.btoa : btoa;
                 qs = new URLSearchParams({"rt": encode(options.postLoginRedirectUrl)}).toString()
             }
-            window.location.href = `${clientState.authUrl}/login?${qs}`
+            return `${clientState.authUrl}/login?${qs}`
         },
 
-        redirectToAccountPage(): void {
-            window.location.href = `${clientState.authUrl}/account`
+        getAccountPageUrl(): string {
+            return `${clientState.authUrl}/account`
         },
 
-        redirectToOrgPage(orgId?: string): void {
+        getOrgPageUrl(orgId?: string): string {
             if (orgId) {
-                window.location.href = `${clientState.authUrl}/org?id=${orgId}`
+                return `${clientState.authUrl}/org?id=${orgId}`
             } else {
-                window.location.href = `${clientState.authUrl}/org`
+                return `${clientState.authUrl}/org`
             }
         },
 
+        getCreateOrgPageUrl(): string {
+            return `${clientState.authUrl}/create_org`
+        },
+
+        getSetupSAMLPageUrl(orgId: string): string {
+            return `${clientState.authUrl}/saml?id=${orgId}`
+        },
+
+        redirectToSignupPage(options?: RedirectToSignupOptions): void {
+            window.location.href = this.getSignupPageUrl(options)
+        },
+
+        redirectToLoginPage(options?: RedirectToLoginOptions): void {
+            window.location.href = this.getLoginPageUrl(options)
+        },
+
+        redirectToAccountPage(): void {
+            window.location.href = this.getAccountPageUrl()
+        },
+
+        redirectToOrgPage(orgId?: string): void {
+            window.location.href = this.getOrgPageUrl(orgId)
+        },
+
         redirectToCreateOrgPage(): void {
-            window.location.href = `${clientState.authUrl}/create_org`
+            window.location.href = this.getCreateOrgPageUrl()
+        },
+
+        redirectToSetupSAMLPage(orgId: string) {
+            window.location.href = this.getSetupSAMLPageUrl(orgId)
         },
 
         async logout(redirectAfterLogout: boolean): Promise<void> {
