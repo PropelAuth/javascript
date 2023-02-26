@@ -45,88 +45,75 @@ export type LogoutResponse = {
 }
 
 export function fetchAuthenticationInfo(authUrl: string): Promise<AuthenticationInfo | null> {
-    return new Promise((resolve, reject) => {
-        const http = new XMLHttpRequest()
-
-        http.onreadystatechange = function () {
-            if (http.readyState === XMLHttpRequest.DONE) {
-                const status = http.status
-
-                if (status >= 200 && status < 300) {
-                    try {
-                        const refreshTokenAndUserInfo = parseJsonConvertingSnakeToCamel(http.responseText)
-                        resolve(refreshTokenAndUserInfo)
-                    } catch (e) {
-                        console.error("Unable to process authentication response", e)
-                        reject({
-                            status: 500,
-                            message: "Unable to process authentication response",
-                        })
-                    }
-                } else if (status === 401) {
-                    resolve(null)
-                } else if (status === 0) {
-                    logCorsError()
-                    reject({
-                        status: 503,
-                        message: "Unable to process authentication response",
-                    })
-                } else {
-                    reject({
-                        status,
-                        message: http.responseText,
-                    })
-                }
-            }
-        }
-
-        http.open("get", `${authUrl}/api/v1/refresh_token`)
-        http.withCredentials = true
-        http.ontimeout = function () {
-            reject({
-                status: 408,
-                message: "Request timed out",
+    return fetch(`${authUrl}/api/v1/refresh_token`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    }).then((res) => {
+        if (res.status === 401) {
+            return null
+        } else if (res.status === 0) {
+            logCorsError()
+            return Promise.reject({
+                status: 503,
+                message: "Unable to process authentication response",
             })
+        } else if (!res.ok) {
+            return Promise.reject({
+                status: res.status,
+                message: res.statusText,
+            })
+        } else {
+            return parseResponse(res)
         }
-        http.send(null)
     })
 }
 
 export function logout(authUrl: string): Promise<LogoutResponse> {
-    return new Promise((resolve, reject) => {
-        const http = new XMLHttpRequest()
-
-        http.onreadystatechange = function () {
-            if (http.readyState === XMLHttpRequest.DONE) {
-                const status = http.status
-                if (status >= 200 && status < 300) {
-                    const jsonResponse = JSON.parse(http.responseText)
-                    resolve(jsonResponse)
-                } else if (status === 0) {
-                    logCorsError()
-                    reject({
-                        status: 503,
-                        message: "Unable to process authentication response",
-                    })
-                } else {
-                    console.error("Logout error", http.status, http.responseText)
-                    reject({
-                        status,
-                        message: http.responseText,
-                    })
-                }
-            }
+    return fetch(`${authUrl}/api/v1/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    }).then((res) => {
+        if (res.status === 0) {
+            logCorsError()
+            return Promise.reject({
+                status: 503,
+                message: "Unable to process authentication response",
+            })
+        } else if (!res.ok) {
+            console.error("Logout error", res.status, res.statusText)
+            return Promise.reject({
+                status: res.status,
+                message: res.statusText,
+            })
+        } else {
+            return res.json()
         }
+    })
+}
 
-        http.open("post", `${authUrl}/api/v1/logout`)
-        http.withCredentials = true
-        http.ontimeout = function () {
-            reject({
-                status: 408,
-                message: "Request timed out",
+function parseResponse(res: Response): Promise<AuthenticationInfo> {
+    return res.text().then(httpResponse => {
+        try {
+            return parseJsonConvertingSnakeToCamel(httpResponse)
+        } catch (e) {
+            console.error("Unable to process authentication response", e)
+            return Promise.reject({
+                status: 500,
+                message: "Unable to process authentication response",
             })
         }
-        http.send(null)
+    }, e => {
+        console.error("Unable to process authentication response", e)
+        return Promise.reject({
+            status: 500,
+            message: "Unable to process authentication response",
+        })
     })
 }
 
