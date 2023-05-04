@@ -37,6 +37,10 @@ export type AuthenticationInfo = {
      */
     orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
     user: User
+
+    // If someone on your team is impersonating another user, this will be set to the employee's ID
+    // By default, user impersonation is turned off and this will be undefined
+    impersonatorUserId?: string
 }
 
 
@@ -161,6 +165,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.lastActiveAt = value
         } else if (key === "legacy_user_id") {
             this.legacyUserId = value
+        } else if (key === "impersonator_user") {
+            this.impersonatorUserId = value
         } else {
             return value
         }
