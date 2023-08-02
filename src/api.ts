@@ -23,6 +23,7 @@ export type User = {
     lastActiveAt: number,
 
     legacyUserId?: string
+    properties?: { [key: string]: unknown }
 }
 
 export type AuthenticationInfo = {
