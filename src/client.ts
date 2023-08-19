@@ -65,6 +65,16 @@ export interface IAuthClient {
     getSetupSAMLPageUrl(orgId: string): string
 
     /**
+     * Gets the URL for the hosted personal API key page.
+     */
+    getPersonalApiKeyPageUrl(): string
+
+    /**
+     * Gets the URL for the hosted org API key page.
+     */
+    getOrgApiKeyPageUrl(orgId: string): string
+
+    /**
      * Redirects the user to the signup page.
      */
     redirectToSignupPage(options?: RedirectToSignupOptions): void
@@ -94,6 +104,16 @@ export interface IAuthClient {
      * Redirects the user to the SAML configuration page.
      */
     redirectToSetupSAMLPage(orgId: string): void
+
+    /**
+     * Redirects the user to the personal API key page.
+     */
+    redirectToPersonalApiKeyPage(): void
+
+    /**
+     * Redirects the user to the org API key page.
+     */
+    redirectToOrgApiKeyPage(): void
 
 
     /**
@@ -277,6 +297,14 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         return `${clientState.authUrl}/saml?id=${orgId}`
     }
 
+    const getPersonalApiKeyPageUrl = () => {
+        return `${clientState.authUrl}/api_keys/personal`
+    }
+
+    const getOrgApiKeyPageUrl = () => {
+        return `${clientState.authUrl}/api_keys/org`
+    }
+
     const client = {
         addLoggedInChangeObserver(loggedInChangeObserver: (isLoggedIn: boolean) => void): void {
             const hasObserver = clientState.observers.includes(loggedInChangeObserver)
@@ -329,6 +357,14 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             return getAccountPageUrl()
         },
 
+        getPersonalApiKeyPageUrl(): string {
+            return getPersonalApiKeyPageUrl()
+        },
+
+        getOrgApiKeyPageUrl(): string {
+            return getOrgApiKeyPageUrl()
+        },
+
         getOrgPageUrl(orgId?: string): string {
             return getOrgPageUrl(orgId)
         },
@@ -363,6 +399,14 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
 
         redirectToSetupSAMLPage(orgId: string) {
             window.location.href = getSetupSAMLPageUrl(orgId)
+        },
+
+        redirectToPersonalApiKeyPage(): void {
+            window.location.href = getPersonalApiKeyPageUrl()
+        },
+
+        redirectToOrgApiKeyPage(): void {
+            window.location.href = getOrgApiKeyPageUrl()
         },
 
         async logout(redirectAfterLogout: boolean): Promise<void> {
