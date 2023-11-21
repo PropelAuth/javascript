@@ -2,7 +2,7 @@ type UserProperties = { [key: string]: unknown }
 
 export class User {
     public userId: string
-    public orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
+    public orgIdToUserOrgInfo?: OrgIdToUserOrgInfo
 
     // Metadata about the user
     public email: string
@@ -19,7 +19,7 @@ export class User {
     constructor(
         userId: string,
         email: string,
-        orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo,
+        orgIdToUserOrgInfo?: OrgIdToUserOrgInfo,
         firstName?: string,
         lastName?: string,
         username?: string,
@@ -28,7 +28,7 @@ export class User {
         properties?: UserProperties
     ) {
         this.userId = userId
-        this.orgIdToOrgMemberInfo = orgIdToOrgMemberInfo
+        this.orgIdToUserOrgInfo = orgIdToUserOrgInfo
 
         this.email = email
         this.firstName = firstName
@@ -40,22 +40,22 @@ export class User {
         this.properties = properties
     }
 
-    public getOrg(orgId: string): OrgMemberInfo | undefined {
-        if (!this.orgIdToOrgMemberInfo) {
+    public getOrg(orgId: string): UserOrgInfo | undefined {
+        if (!this.orgIdToUserOrgInfo) {
             return undefined
         }
 
-        return this.orgIdToOrgMemberInfo[orgId]
+        return this.orgIdToUserOrgInfo[orgId]
     }
 
-    public getOrgByName(orgName: string): OrgMemberInfo | undefined {
-        if (!this.orgIdToOrgMemberInfo) {
+    public getOrgByName(orgName: string): UserOrgInfo | undefined {
+        if (!this.orgIdToUserOrgInfo) {
             return undefined
         }
 
         const urlSafeOrgName = orgName.toLowerCase().replace(/ /g, "-")
-        for (const orgId in this.orgIdToOrgMemberInfo) {
-            const orgMemberInfo = this.orgIdToOrgMemberInfo[orgId]
+        for (const orgId in this.orgIdToUserOrgInfo) {
+            const orgMemberInfo = this.orgIdToUserOrgInfo[orgId]
             if (orgMemberInfo?.urlSafeOrgName === urlSafeOrgName) {
                 return orgMemberInfo
             }
@@ -72,12 +72,12 @@ export class User {
         return this.properties[key]
     }
 
-    public getOrgs(): OrgMemberInfo[] {
-        if (!this.orgIdToOrgMemberInfo) {
+    public getOrgs(): UserOrgInfo[] {
+        if (!this.orgIdToUserOrgInfo) {
             return []
         }
 
-        return Object.values(this.orgIdToOrgMemberInfo)
+        return Object.values(this.orgIdToUserOrgInfo)
     }
 
     public isImpersonating(): boolean {
@@ -122,15 +122,15 @@ export class User {
 
     public static fromJSON(json: string): User {
         const obj = JSON.parse(json)
-        const orgIdToOrgMemberInfo: OrgIdToOrgMemberInfo = {}
-        for (const orgId in obj.orgIdToOrgMemberInfo) {
-            orgIdToOrgMemberInfo[orgId] = OrgMemberInfo.fromJSON(JSON.stringify(obj.orgIdToOrgMemberInfo[orgId]))
+        const orgIdToUserOrgInfo: OrgIdToUserOrgInfo = {}
+        for (const orgId in obj.orgIdToUserOrgInfo) {
+            orgIdToUserOrgInfo[orgId] = UserOrgInfo.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
         }
         try {
             return new User(
                 obj.userId,
                 obj.email,
-                orgIdToOrgMemberInfo,
+                orgIdToUserOrgInfo,
                 obj.firstName,
                 obj.lastName,
                 obj.username,
@@ -145,11 +145,11 @@ export class User {
     }
 }
 
-interface OrgIdToOrgMemberInfo {
-    [orgId: string]: OrgMemberInfo
+interface OrgIdToUserOrgInfo {
+    [orgId: string]: UserOrgInfo
 }
 
-export class OrgMemberInfo {
+export class UserOrgInfo {
     public orgId: string
     public orgName: string
     public orgMetadata: { [key: string]: any }
@@ -209,10 +209,10 @@ export class OrgMemberInfo {
         return this.userPermissions
     }
 
-    public static fromJSON(json: string): OrgMemberInfo {
+    public static fromJSON(json: string): UserOrgInfo {
         const obj = JSON.parse(json)
         try {
-            return new OrgMemberInfo(
+            return new UserOrgInfo(
                 obj.orgId,
                 obj.orgName,
                 obj.orgMetadata,
@@ -223,7 +223,7 @@ export class OrgMemberInfo {
             )
         } catch (e) {
             console.error(
-                "Unable to parse OrgMemberInfo. Make sure the JSON string is a stringified `OrgMemberInfo` type.",
+                "Unable to parse UserOrgInfo. Make sure the JSON string is a stringified `UserOrgInfo` type.",
                 e
             )
             throw e

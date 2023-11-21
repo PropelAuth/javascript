@@ -1,6 +1,6 @@
-import { OrgMemberInfo, User } from "./user"
+import { User, UserOrgInfo } from "./user"
 
-const mockOrgMemberInfo = new OrgMemberInfo(
+const mockUserOrgInfo = new UserOrgInfo(
     "mockOrgId",
     "Mock Org Name",
     {},
@@ -14,7 +14,7 @@ const mockUser = new User(
     "userId",
     "email",
     {
-        mockOrgId: mockOrgMemberInfo,
+        mockOrgId: mockUserOrgInfo,
     },
     "firstName",
     "lastName",
@@ -29,11 +29,11 @@ const mockUser = new User(
 describe("User", () => {
     describe("User Class", () => {
         it("should get an org", () => {
-            expect(mockUser.getOrg("mockOrgId")).toEqual(mockOrgMemberInfo)
+            expect(mockUser.getOrg("mockOrgId")).toEqual(mockUserOrgInfo)
             expect(mockUser.getOrg("mockOrgId2")).toBeUndefined()
         })
         it("should get an org by name", () => {
-            expect(mockUser.getOrgByName("Mock Org Name")).toEqual(mockOrgMemberInfo)
+            expect(mockUser.getOrgByName("Mock Org Name")).toEqual(mockUserOrgInfo)
             expect(mockUser.getOrgByName("Mock Org Name 2")).toBeUndefined()
         })
         it("should get a user property", () => {
@@ -41,7 +41,7 @@ describe("User", () => {
             expect(mockUser.getUserProperty("property2")).toBeUndefined()
         })
         it("should get all orgs", () => {
-            expect(mockUser.getOrgs()).toEqual([mockOrgMemberInfo])
+            expect(mockUser.getOrgs()).toEqual([mockUserOrgInfo])
         })
         it("should ensure the user is a certain role", () => {
             expect(mockUser.isRole("mockOrgId", "Admin")).toEqual(true)
@@ -71,38 +71,38 @@ describe("User", () => {
             expect(() => User.fromJSON("invalid json")).toThrowError()
         })
     })
-    describe("OrgMemberInfo Class", () => {
+    describe("UserOrgInfo Class", () => {
         it("should validate a role", () => {
-            expect(mockOrgMemberInfo.isRole("Admin")).toEqual(true)
-            expect(mockOrgMemberInfo.isRole("Member")).toEqual(false)
-            expect(mockOrgMemberInfo.isRole("Owner")).toEqual(false)
+            expect(mockUserOrgInfo.isRole("Admin")).toEqual(true)
+            expect(mockUserOrgInfo.isRole("Member")).toEqual(false)
+            expect(mockUserOrgInfo.isRole("Owner")).toEqual(false)
         })
         it("should validate a role is at least a certain role", () => {
-            expect(mockOrgMemberInfo.isAtLeastRole("Admin")).toEqual(true)
-            expect(mockOrgMemberInfo.isAtLeastRole("Member")).toEqual(true)
-            expect(mockOrgMemberInfo.isAtLeastRole("Owner")).toEqual(false)
+            expect(mockUserOrgInfo.isAtLeastRole("Admin")).toEqual(true)
+            expect(mockUserOrgInfo.isAtLeastRole("Member")).toEqual(true)
+            expect(mockUserOrgInfo.isAtLeastRole("Owner")).toEqual(false)
         })
         it("should validate a permission", () => {
-            expect(mockOrgMemberInfo.hasPermission("user::create")).toEqual(true)
-            expect(mockOrgMemberInfo.hasPermission("user::delete")).toEqual(true)
-            expect(mockOrgMemberInfo.hasPermission("user::update")).toEqual(false)
+            expect(mockUserOrgInfo.hasPermission("user::create")).toEqual(true)
+            expect(mockUserOrgInfo.hasPermission("user::delete")).toEqual(true)
+            expect(mockUserOrgInfo.hasPermission("user::update")).toEqual(false)
         })
         it("should validate all permissions", () => {
-            expect(mockOrgMemberInfo.hasAllPermissions(["user::create", "user::delete"])).toEqual(true)
-            expect(mockOrgMemberInfo.hasAllPermissions(["user::create", "user::update"])).toEqual(false)
+            expect(mockUserOrgInfo.hasAllPermissions(["user::create", "user::delete"])).toEqual(true)
+            expect(mockUserOrgInfo.hasAllPermissions(["user::create", "user::update"])).toEqual(false)
         })
         it("should get an assigned role", () => {
-            expect(mockOrgMemberInfo.getAssignedRole()).toEqual("Admin")
+            expect(mockUserOrgInfo.getAssignedRole()).toEqual("Admin")
         })
         it("should get inherited roles with current role", () => {
-            expect(mockOrgMemberInfo.getInheritedRolesPlusCurrentRole()).toEqual(["Admin", "Member"])
+            expect(mockUserOrgInfo.getInheritedRolesPlusCurrentRole()).toEqual(["Admin", "Member"])
         })
         it("should get permissions", () => {
-            expect(mockOrgMemberInfo.getPermissions()).toEqual(["user::create", "user::delete"])
+            expect(mockUserOrgInfo.getPermissions()).toEqual(["user::create", "user::delete"])
         })
         it("should parse a org member info from JSON string", () => {
-            expect(OrgMemberInfo.fromJSON(JSON.stringify(mockOrgMemberInfo))).toEqual(mockOrgMemberInfo)
-            expect(() => OrgMemberInfo.fromJSON("invalid json")).toThrowError()
+            expect(UserOrgInfo.fromJSON(JSON.stringify(mockUserOrgInfo))).toEqual(mockUserOrgInfo)
+            expect(() => UserOrgInfo.fromJSON("invalid json")).toThrowError()
         })
     })
 })
