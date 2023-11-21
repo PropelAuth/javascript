@@ -1,3 +1,5 @@
+type UserProperties = { [key: string]: unknown }
+
 export class User {
     public userId: string
     public orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
@@ -7,7 +9,7 @@ export class User {
     public firstName?: string
     public lastName?: string
     public username?: string
-    public properties?: { [key: string]: unknown }
+    public properties?: UserProperties
 
     // If you used our migration APIs to migrate this user from a different system,
     // this is their original ID from that system.
@@ -22,7 +24,8 @@ export class User {
         lastName?: string,
         username?: string,
         legacyUserId?: string,
-        impersonatorUserId?: string
+        impersonatorUserId?: string,
+        properties?: UserProperties
     ) {
         this.userId = userId
         this.orgIdToOrgMemberInfo = orgIdToOrgMemberInfo
@@ -34,6 +37,7 @@ export class User {
 
         this.legacyUserId = legacyUserId
         this.impersonatorUserId = impersonatorUserId
+        this.properties = properties
     }
 
     public getOrg(orgId: string): OrgMemberInfo | undefined {
@@ -60,7 +64,7 @@ export class User {
         return undefined
     }
 
-    public getProperty(key: string): unknown | undefined {
+    public getUserProperty(key: string): unknown | undefined {
         if (!this.properties) {
             return undefined
         }
@@ -131,7 +135,8 @@ export class User {
                 obj.lastName,
                 obj.username,
                 obj.legacyUserId,
-                obj.impersonatorUserId
+                obj.impersonatorUserId,
+                obj.properties
             )
         } catch (e) {
             console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)
@@ -191,16 +196,16 @@ export class OrgMemberInfo {
         return permissions.every((permission) => this.hasPermission(permission))
     }
 
-    // Getters for priavet fields
-    get assignedRole(): string {
+    // Getters for private fields
+    public getAssignedRole(): string {
         return this.userAssignedRole
     }
 
-    get inheritedRolesPlusCurrentRole(): string[] {
+    public getInheritedRolesPlusCurrentRole(): string[] {
         return this.userInheritedRolesPlusCurrentRole
     }
 
-    get permissions(): string[] {
+    public getPermissions(): string[] {
         return this.userPermissions
     }
 
