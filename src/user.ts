@@ -70,6 +70,65 @@ export class User {
     public isImpersonating(): boolean {
         return !!this.impersonatorUserId
     }
+
+    public isRole(orgId: string, role: string): boolean {
+        const orgMemberInfo = this.getOrg(orgId)
+        if (!orgMemberInfo) {
+            return false
+        }
+
+        return orgMemberInfo.isRole(role)
+    }
+
+    public isAtLeastRole(orgId: string, role: string): boolean {
+        const orgMemberInfo = this.getOrg(orgId)
+        if (!orgMemberInfo) {
+            return false
+        }
+
+        return orgMemberInfo.isAtLeastRole(role)
+    }
+
+    public hasPermission(orgId: string, permission: string): boolean {
+        const orgMemberInfo = this.getOrg(orgId)
+        if (!orgMemberInfo) {
+            return false
+        }
+
+        return orgMemberInfo.hasPermission(permission)
+    }
+
+    public hasAllPermissions(orgId: string, permissions: string[]): boolean {
+        const orgMemberInfo = this.getOrg(orgId)
+        if (!orgMemberInfo) {
+            return false
+        }
+
+        return orgMemberInfo.hasAllPermissions(permissions)
+    }
+
+    public static fromJSON(json: string): User {
+        const obj = JSON.parse(json)
+        const orgIdToOrgMemberInfo: OrgIdToOrgMemberInfo = {}
+        for (const orgId in obj.orgIdToOrgMemberInfo) {
+            orgIdToOrgMemberInfo[orgId] = OrgMemberInfo.fromJSON(JSON.stringify(obj.orgIdToOrgMemberInfo[orgId]))
+        }
+        try {
+            return new User(
+                obj.userId,
+                obj.email,
+                orgIdToOrgMemberInfo,
+                obj.firstName,
+                obj.lastName,
+                obj.username,
+                obj.legacyUserId,
+                obj.impersonatorUserId
+            )
+        } catch (e) {
+            console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)
+            throw e
+        }
+    }
 }
 
 interface OrgIdToOrgMemberInfo {
@@ -134,5 +193,26 @@ export class OrgMemberInfo {
 
     get permissions(): string[] {
         return this.userPermissions
+    }
+
+    public static fromJSON(json: string): OrgMemberInfo {
+        const obj = JSON.parse(json)
+        try {
+            return new OrgMemberInfo(
+                obj.orgId,
+                obj.orgName,
+                obj.orgMetadata,
+                obj.urlSafeOrgName,
+                obj.userAssignedRole,
+                obj.userInheritedRolesPlusCurrentRole,
+                obj.userPermissions
+            )
+        } catch (e) {
+            console.error(
+                "Unable to parse OrgMemberInfo. Make sure the JSON string is a stringified `OrgMemberInfo` type.",
+                e
+            )
+            throw e
+        }
     }
 }
