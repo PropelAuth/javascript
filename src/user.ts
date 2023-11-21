@@ -7,6 +7,7 @@ export class User {
     public firstName?: string
     public lastName?: string
     public username?: string
+    public properties?: { [key: string]: unknown }
 
     // If you used our migration APIs to migrate this user from a different system,
     // this is their original ID from that system.
@@ -57,6 +58,14 @@ export class User {
         }
 
         return undefined
+    }
+
+    public getProperty(key: string): unknown | undefined {
+        if (!this.properties) {
+            return undefined
+        }
+
+        return this.properties[key]
     }
 
     public getOrgs(): OrgMemberInfo[] {
