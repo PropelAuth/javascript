@@ -1,15 +1,19 @@
 type UserProperties = { [key: string]: unknown }
 
-export class User {
+export class UserClass {
     public userId: string
     public orgIdToUserOrgInfo?: OrgIdToUserOrgInfo
 
     // Metadata about the user
     public email: string
+    public createdAt: number
     public firstName?: string
     public lastName?: string
     public username?: string
     public properties?: UserProperties
+    public pictureUrl?: string
+    public hasPassword?: boolean
+    public hasMfaEnabled?: boolean
 
     // If you used our migration APIs to migrate this user from a different system,
     // this is their original ID from that system.
@@ -19,13 +23,17 @@ export class User {
     constructor(
         userId: string,
         email: string,
+        createdAt: number,
         orgIdToUserOrgInfo?: OrgIdToUserOrgInfo,
         firstName?: string,
         lastName?: string,
         username?: string,
         legacyUserId?: string,
         impersonatorUserId?: string,
-        properties?: UserProperties
+        properties?: UserProperties,
+        pictureUrl?: string,
+        hasPassword?: boolean,
+        hasMfaEnabled?: boolean
     ) {
         this.userId = userId
         this.orgIdToUserOrgInfo = orgIdToUserOrgInfo
@@ -34,6 +42,10 @@ export class User {
         this.firstName = firstName
         this.lastName = lastName
         this.username = username
+        this.createdAt = createdAt
+        this.pictureUrl = pictureUrl
+        this.hasPassword = hasPassword
+        this.hasMfaEnabled = hasMfaEnabled
 
         this.legacyUserId = legacyUserId
         this.impersonatorUserId = impersonatorUserId
@@ -120,23 +132,27 @@ export class User {
         return orgMemberInfo.hasAllPermissions(permissions)
     }
 
-    public static fromJSON(json: string): User {
+    public static fromJSON(json: string): UserClass {
         const obj = JSON.parse(json)
         const orgIdToUserOrgInfo: OrgIdToUserOrgInfo = {}
         for (const orgId in obj.orgIdToUserOrgInfo) {
             orgIdToUserOrgInfo[orgId] = UserOrgInfo.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
         }
         try {
-            return new User(
+            return new UserClass(
                 obj.userId,
                 obj.email,
+                obj.createdAt,
                 orgIdToUserOrgInfo,
                 obj.firstName,
                 obj.lastName,
                 obj.username,
                 obj.legacyUserId,
                 obj.impersonatorUserId,
-                obj.properties
+                obj.properties,
+                obj.pictureUrl,
+                obj.hasPassword,
+                obj.hasMfaEnabled
             )
         } catch (e) {
             console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)

@@ -1,4 +1,4 @@
-import { User, UserOrgInfo } from "./user"
+import { UserClass, UserOrgInfo } from "./user"
 
 const mockUserOrgInfo = new UserOrgInfo(
     "mockOrgId",
@@ -10,9 +10,10 @@ const mockUserOrgInfo = new UserOrgInfo(
     ["user::create", "user::delete"]
 )
 
-const mockUser = new User(
+const mockUser = new UserClass(
     "userId",
     "email",
+    12345678,
     {
         mockOrgId: mockUserOrgInfo,
     },
@@ -67,8 +68,8 @@ describe("User", () => {
             expect(mockUser.hasAllPermissions("mockOrgId2", ["user::create", "user::delete"])).toEqual(false)
         })
         it("should parse a user from JSON string", () => {
-            expect(User.fromJSON(JSON.stringify(mockUser))).toEqual(mockUser)
-            expect(() => User.fromJSON("invalid json")).toThrowError()
+            expect(UserClass.fromJSON(JSON.stringify(mockUser))).toEqual(mockUser)
+            expect(() => UserClass.fromJSON("invalid json")).toThrowError()
         })
     })
     describe("UserOrgInfo Class", () => {
