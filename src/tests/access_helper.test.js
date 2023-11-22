@@ -1,9 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import { getAccessHelper } from "./access_helper"
-import { createOrgs, createOrgIdToOrgMemberInfo } from "./test_helper"
- 
+import { getAccessHelper } from "../access_helper"
+import { createOrgIdToOrgMemberInfo, createOrgs } from "./test_helper"
+
 it("accessHelper validate methods work", async () => {
     const orgs = createOrgs(1)
     const orgId = orgs[0].orgId
