@@ -1,9 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import {createClient} from "./index"
-import {ok, ResponseStatus, setupMockFetch, UnauthorizedResponse, UnknownErrorResponse} from "./mockfetch.test"
-import {OrgIdToOrgMemberInfo} from "./org"
+import { createClient } from "../index"
+import { OrgIdToOrgMemberInfo } from "../org"
+import { ok, ResponseStatus, setupMockFetch, UnauthorizedResponse, UnknownErrorResponse } from "./mockfetch.test"
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
@@ -55,7 +55,7 @@ beforeEach(() => {
             },
         }
     })()
-    Object.defineProperty(window, "localStorage", {value: localStorageMock})
+    Object.defineProperty(window, "localStorage", { value: localStorageMock })
 })
 
 afterEach(() => {
@@ -68,19 +68,19 @@ afterAll(() => {
 
 test("cannot create client without auth url origin", () => {
     expect(() => {
-        createClient({authUrl: ""})
+        createClient({ authUrl: "" })
     }).toThrow()
 })
 
 test("cannot create client with invalid auth url origin", () => {
     expect(() => {
-        createClient({authUrl: "whatisthis"})
+        createClient({ authUrl: "whatisthis" })
     }).toThrow()
 })
 
 test("client works with ending slash", async () => {
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com/", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com/", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.accessToken).toBe(expectedAccessToken)
@@ -88,8 +88,8 @@ test("client works with ending slash", async () => {
 })
 
 test("client works without ending slash", async () => {
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.accessToken).toBe(expectedAccessToken)
@@ -97,8 +97,8 @@ test("client works without ending slash", async () => {
 })
 
 test("client parses user correctly", async () => {
-    const {mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.user.userId).toBe(DEFAULT_USER.user_id)
@@ -159,11 +159,11 @@ test("client parses org information correctly", async () => {
             userAssignedRole: "Member",
             userInheritedRolesPlusCurrentRole: ["Member"],
             userPermissions: ["View"],
-        }
+        },
     }
 
-    const {mockFetch} = setupMockFetchThatReturnsAccessToken(expiresAtSeconds, DEFAULT_USER, apiOrgIdToOrgMemberInfo)
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { mockFetch } = setupMockFetchThatReturnsAccessToken(expiresAtSeconds, DEFAULT_USER, apiOrgIdToOrgMemberInfo)
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.orgIdToOrgMemberInfo).toStrictEqual(typeScriptOrgIdToOrgMemberInfo)
@@ -172,8 +172,8 @@ test("client parses org information correctly", async () => {
 })
 
 test("client returns null on a 401", async () => {
-    const {mockFetch} = setupMockFetchThatReturnsUnauthorized()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { mockFetch } = setupMockFetchThatReturnsUnauthorized()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo).toBeNull()
@@ -181,8 +181,8 @@ test("client returns null on a 401", async () => {
 })
 
 test("repeated calls to getAuthenticationInfo do NOT make multiple http requests if the expiration is far in the future", async () => {
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.accessToken).toBe(expectedAccessToken)
@@ -190,7 +190,7 @@ test("repeated calls to getAuthenticationInfo do NOT make multiple http requests
 
     // Change the server to return a different access token.
     // Since time is mocked and not advancing, we will continue to use the current access token
-    const {mockFetch: newMockFetch} = setupMockFetchThatReturnsAccessToken()
+    const { mockFetch: newMockFetch } = setupMockFetchThatReturnsAccessToken()
     for (let i = 0; i < 10; i++) {
         const latestAuthenticationInfo = await client.getAuthenticationInfoOrNull()
         expect(latestAuthenticationInfo?.accessToken).toBe(expectedAccessToken)
@@ -200,8 +200,8 @@ test("repeated calls to getAuthenticationInfo do NOT make multiple http requests
 
 test("if expiration is coming up, calls to getAuthenticationInfo will make a new http request", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // Since time is not advancing, at the end of these 10 calls, the endpoint would only be hit once
     for (let i = 0; i < 10; i++) {
@@ -213,7 +213,7 @@ test("if expiration is coming up, calls to getAuthenticationInfo will make a new
     // Advance time and reset the servers access token
     jest.setSystemTime(expiresAtSeconds * 1000)
     const newExpiresAtSeconds = expiresAtSeconds + 60 * 30
-    const {expectedAccessToken: newExpectedAccessToken, mockFetch: newMockFetch} =
+    const { expectedAccessToken: newExpectedAccessToken, mockFetch: newMockFetch } =
         setupMockFetchThatReturnsAccessToken(newExpiresAtSeconds)
 
     // Now we should realize the expiration time is up and request a new token, but again, only once
@@ -225,8 +225,8 @@ test("if expiration is coming up, calls to getAuthenticationInfo will make a new
 })
 
 test("force refresh will force another http request", async () => {
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // In the real world we'd get a new token each time, but in tests it's hardcoded
     for (let i = 0; i < 10; i++) {
@@ -245,8 +245,8 @@ test("force refresh will force another http request", async () => {
 })
 
 test("client returns null on a refresh that 401s", async () => {
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First we get the token like normal
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
@@ -254,7 +254,7 @@ test("client returns null on a refresh that 401s", async () => {
     expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token")
 
     // Then we force a refresh after setting up the server to 401
-    const {mockFetch: errorMockFetch} = setupMockFetchThatReturnsUnauthorized()
+    const { mockFetch: errorMockFetch } = setupMockFetchThatReturnsUnauthorized()
     const errorAuthenticationInfo = await client.getAuthenticationInfoOrNull(true)
     expect(errorAuthenticationInfo).toBeNull()
     expectCorrectEndpointWasHit(errorMockFetch, "https://www.example.com/api/v1/refresh_token")
@@ -262,8 +262,8 @@ test("client returns null on a refresh that 401s", async () => {
 
 test("client continues to use cached value if the API fails and the value hasn't expired", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First we get the token like normal
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
@@ -274,7 +274,7 @@ test("client continues to use cached value if the API fails and the value hasn't
     jest.setSystemTime((expiresAtSeconds - 60) * 1000)
 
     // The API will now fail, but that failure should be logged and not effect this method
-    const {mockFetch: errorMockFetch} = setupMockFetchThatReturnsUnknownError()
+    const { mockFetch: errorMockFetch } = setupMockFetchThatReturnsUnknownError()
     const newAuthenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(newAuthenticationInfo?.accessToken).toBe(expectedAccessToken)
     expectCorrectEndpointWasHit(errorMockFetch, "https://www.example.com/api/v1/refresh_token")
@@ -282,8 +282,8 @@ test("client continues to use cached value if the API fails and the value hasn't
 
 test("client cannot use cached value if the API fails and the value has expired", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First we get the token like normal
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
@@ -301,8 +301,8 @@ test("client cannot use cached value if the API fails and the value has expired"
 
 test("client returns null on a 401 after expiration", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First we get the token like normal
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
@@ -311,7 +311,7 @@ test("client returns null on a 401 after expiration", async () => {
 
     // Then we force a refresh by moving time forward, and setup the server to 401
     jest.setSystemTime(expiresAtSeconds * 1000 + 10)
-    const {mockFetch: errorMockFetch} = setupMockFetchThatReturnsUnauthorized()
+    const { mockFetch: errorMockFetch } = setupMockFetchThatReturnsUnauthorized()
     const errorAuthenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(errorAuthenticationInfo).toBeNull()
     expectCorrectEndpointWasHit(errorMockFetch, "https://www.example.com/api/v1/refresh_token")
@@ -319,22 +319,22 @@ test("client returns null on a 401 after expiration", async () => {
 
 test("getAuthenticationInfoOrNull after logout triggers another http call", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First get the token and make sure it hit the server
-    const {expectedAccessToken: expectedAccessToken0, mockFetch: mockFetch0} =
+    const { expectedAccessToken: expectedAccessToken0, mockFetch: mockFetch0 } =
         setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
     const authenticationInfo0 = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo0?.accessToken).toBe(expectedAccessToken0)
     expectCorrectEndpointWasHit(mockFetch0, "https://www.example.com/api/v1/refresh_token", 1)
 
     // Then logout and make sure it hit the server
-    const {mockFetch: logoutMockFetch} = setupMockFetchForLogout()
+    const { mockFetch: logoutMockFetch } = setupMockFetchForLogout()
     await client.logout(false)
     expectCorrectEndpointWasHit(logoutMockFetch, "https://www.example.com/api/v1/logout", 1, "post")
 
     // Then make sure the next call to getAuthenticationInfoOrNull hits the server
-    const {expectedAccessToken: expectedAccessToken1, mockFetch: mockFetch1} =
+    const { expectedAccessToken: expectedAccessToken1, mockFetch: mockFetch1 } =
         setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
     const authenticationInfo1 = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo1?.accessToken).toBe(expectedAccessToken1)
@@ -343,29 +343,29 @@ test("getAuthenticationInfoOrNull after logout triggers another http call", asyn
 
 test("getAuthenticationInfoOrNull after logout triggers another http call, and returns null on 401", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First get the token and make sure it hit the server
-    const {expectedAccessToken: expectedAccessToken0, mockFetch: mockFetch0} =
+    const { expectedAccessToken: expectedAccessToken0, mockFetch: mockFetch0 } =
         setupMockFetchThatReturnsAccessToken(expiresAtSeconds)
     const authenticationInfo0 = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo0?.accessToken).toBe(expectedAccessToken0)
     expectCorrectEndpointWasHit(mockFetch0, "https://www.example.com/api/v1/refresh_token", 1)
 
     // Then logout and make sure it hit the server
-    const {mockFetch: logoutMockFetch} = setupMockFetchForLogout()
+    const { mockFetch: logoutMockFetch } = setupMockFetchForLogout()
     await client.logout(false)
     expectCorrectEndpointWasHit(logoutMockFetch, "https://www.example.com/api/v1/logout", 1, "post")
 
     // Then make sure the next call to get hits the server
-    const {mockFetch: mockFetch1} = setupMockFetchThatReturnsUnauthorized()
+    const { mockFetch: mockFetch1 } = setupMockFetchThatReturnsUnauthorized()
     const authenticationInfo1 = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo1).toBeNull()
     expectCorrectEndpointWasHit(mockFetch1, "https://www.example.com/api/v1/refresh_token", 1)
 })
 
 test("observers work", async () => {
-    let client = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     let clientObserved: boolean[] = []
     const clientObserver = (loggedIn: boolean) => {
@@ -373,7 +373,7 @@ test("observers work", async () => {
     }
     client.addLoggedInChangeObserver(clientObserver)
 
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.accessToken).toBe(expectedAccessToken)
     expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token")
@@ -390,23 +390,23 @@ test("observers work", async () => {
 })
 
 test("if a new client is created and cannot get an access token, it should trigger a logout event", async () => {
-    let client0 = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    let client0 = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     // First client is set up and gets a token
-    const {expectedAccessToken, mockFetch} = setupMockFetchThatReturnsAccessToken()
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
     const authenticationInfo0 = await client0.getAuthenticationInfoOrNull()
     expect(authenticationInfo0?.accessToken).toBe(expectedAccessToken)
     expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token", 1)
 
     // The user is no longer logged in
-    const {mockFetch: logoutMockFetch} = setupMockFetchThatReturnsUnauthorized()
+    const { mockFetch: logoutMockFetch } = setupMockFetchThatReturnsUnauthorized()
 
     // Since client0 already got a token and time isn't advancing, that token is still valid
     const cachedAuthenticationInfo0 = await client0.getAuthenticationInfoOrNull()
     expect(cachedAuthenticationInfo0?.accessToken).toBe(expectedAccessToken)
 
     // Even though this new client was never logged in, it should trigger a logout event for client0
-    let client1 = createClient({authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false})
+    let client1 = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
 
     const post401AuthenticationInfo1 = await client1.getAuthenticationInfoOrNull()
     expect(post401AuthenticationInfo1).toBeNull()
@@ -435,7 +435,7 @@ function expectMockWasNeverCalled(mockFetch: any) {
 function setupMockFetchForLogout() {
     const response = ok({})
     const mockFetch = setupMockFetch(response)
-    return {mockFetch}
+    return { mockFetch }
 }
 
 interface ApiUser {
@@ -475,17 +475,17 @@ function setupMockFetchThatReturnsAccessToken(
         user: user,
     })
     const mockFetch = setupMockFetch(response)
-    return {expectedAccessToken, mockFetch}
+    return { expectedAccessToken, mockFetch }
 }
 
 function setupMockFetchThatReturnsUnauthorized() {
-    const response: UnauthorizedResponse = {status: ResponseStatus.Unauthorized}
+    const response: UnauthorizedResponse = { status: ResponseStatus.Unauthorized }
     const mockFetch = setupMockFetch(response)
-    return {mockFetch}
+    return { mockFetch }
 }
 
 function setupMockFetchThatReturnsUnknownError() {
-    const response: UnknownErrorResponse = {status: ResponseStatus.UnknownError}
+    const response: UnknownErrorResponse = { status: ResponseStatus.UnknownError }
     const mockFetch = setupMockFetch(response)
-    return {mockFetch}
+    return { mockFetch }
 }

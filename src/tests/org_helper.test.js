@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 import { v4 as uuidv4 } from "uuid"
-import { getOrgHelper } from "./org_helper"
-import { createOrgs, createOrgIdToOrgMemberInfo, getAllProperties } from "./test_helper"
+import { getOrgHelper } from "../org_helper"
+import { createOrgIdToOrgMemberInfo, createOrgs, getAllProperties } from "./test_helper"
 
 beforeEach(() => {
     const localStorageMock = (function () {
