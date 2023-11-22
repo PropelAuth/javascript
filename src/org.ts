@@ -1,5 +1,5 @@
-import { ACTIVE_ORG_ID_COOKIE_NAME } from "@propelauth/backend-js-utilities"
 import Cookies from "js-cookie"
+import { ACTIVE_ORG_ID_COOKIE_NAME } from "./cookies"
 
 export type OrgMemberInfo = {
     orgId: string
