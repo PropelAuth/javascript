@@ -140,20 +140,23 @@ export class UserClass {
             orgIdToUserOrgInfo[orgId] = UserOrgInfo.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
         }
         try {
-            return new UserClass({
-                userId: obj.userId,
-                email: obj.email,
-                createdAt: obj.createdAt,
-                firstName: obj.firstName,
-                lastName: obj.lastName,
-                username: obj.username,
-                legacyUserId: obj.legacyUserId,
-                impersonatorUserId: obj.impersonatorUserId,
-                properties: obj.properties,
-                pictureUrl: obj.pictureUrl,
-                hasPassword: obj.hasPassword,
-                hasMfaEnabled: obj.hasMfaEnabled,
-            })
+            return new UserClass(
+                {
+                    userId: obj.userId,
+                    email: obj.email,
+                    createdAt: obj.createdAt,
+                    firstName: obj.firstName,
+                    lastName: obj.lastName,
+                    username: obj.username,
+                    legacyUserId: obj.legacyUserId,
+                    impersonatorUserId: obj.impersonatorUserId,
+                    properties: obj.properties,
+                    pictureUrl: obj.pictureUrl,
+                    hasPassword: obj.hasPassword,
+                    hasMfaEnabled: obj.hasMfaEnabled,
+                },
+                orgIdToUserOrgInfo
+            )
         } catch (e) {
             console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)
             throw e

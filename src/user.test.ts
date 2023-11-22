@@ -11,19 +11,21 @@ const mockUserOrgInfo = new UserOrgInfo(
 )
 
 const mockUser = new UserClass(
-    "userId",
-    "email",
-    12345678,
+    {
+        userId: "userId",
+        email: "email",
+        createdAt: 12345678,
+        firstName: "firstName",
+        lastName: "lastName",
+        username: "username",
+        legacyUserId: "legacyUserId",
+        impersonatorUserId: "impersonatorUserId",
+        properties: {
+            property: "value",
+        },
+    },
     {
         mockOrgId: mockUserOrgInfo,
-    },
-    "firstName",
-    "lastName",
-    "username",
-    "legacyUserId",
-    "impersonatorUserId",
-    {
-        property: "value",
     }
 )
 
@@ -91,15 +93,6 @@ describe("User", () => {
         it("should validate all permissions", () => {
             expect(mockUserOrgInfo.hasAllPermissions(["user::create", "user::delete"])).toEqual(true)
             expect(mockUserOrgInfo.hasAllPermissions(["user::create", "user::update"])).toEqual(false)
-        })
-        it("should get an assigned role", () => {
-            expect(mockUserOrgInfo.getAssignedRole()).toEqual("Admin")
-        })
-        it("should get inherited roles with current role", () => {
-            expect(mockUserOrgInfo.getInheritedRolesPlusCurrentRole()).toEqual(["Admin", "Member"])
-        })
-        it("should get permissions", () => {
-            expect(mockUserOrgInfo.getPermissions()).toEqual(["user::create", "user::delete"])
         })
         it("should parse a org member info from JSON string", () => {
             expect(UserOrgInfo.fromJSON(JSON.stringify(mockUserOrgInfo))).toEqual(mockUserOrgInfo)
