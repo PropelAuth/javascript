@@ -14,7 +14,10 @@ export type OrgIdToOrgMemberInfo = {
 }
 
 export const setActiveOrgId = (orgId: string) => {
-    Cookies.set(ACTIVE_ORG_ID_COOKIE_NAME, orgId)
+    Cookies.set(ACTIVE_ORG_ID_COOKIE_NAME, orgId, {
+        sameSite: "lax",
+        secure: true,
+    })
 }
 
 export const getActiveOrgId = (): string | undefined => {
