@@ -171,9 +171,9 @@ export class UserOrgInfo {
     public orgMetadata: { [key: string]: any }
     public urlSafeOrgName: string
 
-    private userAssignedRole: string
-    private userInheritedRolesPlusCurrentRole: string[]
-    private userPermissions: string[]
+    public userAssignedRole: string
+    public userInheritedRolesPlusCurrentRole: string[]
+    public userPermissions: string[]
 
     constructor(
         orgId: string,
@@ -195,7 +195,6 @@ export class UserOrgInfo {
     }
 
     // validation methods
-
     public isRole(role: string): boolean {
         return this.userAssignedRole === role
     }
@@ -210,19 +209,6 @@ export class UserOrgInfo {
 
     public hasAllPermissions(permissions: string[]): boolean {
         return permissions.every((permission) => this.hasPermission(permission))
-    }
-
-    // Getters for private fields
-    public getAssignedRole(): string {
-        return this.userAssignedRole
-    }
-
-    public getInheritedRolesPlusCurrentRole(): string[] {
-        return this.userInheritedRolesPlusCurrentRole
-    }
-
-    public getPermissions(): string[] {
-        return this.userPermissions
     }
 
     public static fromJSON(json: string): UserOrgInfo {
