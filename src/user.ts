@@ -1,5 +1,20 @@
 type UserProperties = { [key: string]: unknown }
 
+interface UserFields {
+    userId: string
+    email: string
+    createdAt: number
+    firstName?: string
+    lastName?: string
+    username?: string
+    properties?: UserProperties
+    pictureUrl?: string
+    hasPassword?: boolean
+    hasMfaEnabled?: boolean
+    legacyUserId?: string
+    impersonatorUserId?: string
+}
+
 export class UserClass {
     public userId: string
     public orgIdToUserOrgInfo?: OrgIdToUserOrgInfo
@@ -20,36 +35,22 @@ export class UserClass {
     public legacyUserId?: string
     public impersonatorUserId?: string
 
-    constructor(
-        userId: string,
-        email: string,
-        createdAt: number,
-        orgIdToUserOrgInfo?: OrgIdToUserOrgInfo,
-        firstName?: string,
-        lastName?: string,
-        username?: string,
-        legacyUserId?: string,
-        impersonatorUserId?: string,
-        properties?: UserProperties,
-        pictureUrl?: string,
-        hasPassword?: boolean,
-        hasMfaEnabled?: boolean
-    ) {
-        this.userId = userId
+    constructor(userFields: UserFields, orgIdToUserOrgInfo?: OrgIdToUserOrgInfo) {
+        this.userId = userFields.userId
         this.orgIdToUserOrgInfo = orgIdToUserOrgInfo
 
-        this.email = email
-        this.firstName = firstName
-        this.lastName = lastName
-        this.username = username
-        this.createdAt = createdAt
-        this.pictureUrl = pictureUrl
-        this.hasPassword = hasPassword
-        this.hasMfaEnabled = hasMfaEnabled
+        this.email = userFields.email
+        this.firstName = userFields.firstName
+        this.lastName = userFields.lastName
+        this.username = userFields.username
+        this.createdAt = userFields.createdAt
+        this.pictureUrl = userFields.pictureUrl
+        this.hasPassword = userFields.hasPassword
+        this.hasMfaEnabled = userFields.hasMfaEnabled
 
-        this.legacyUserId = legacyUserId
-        this.impersonatorUserId = impersonatorUserId
-        this.properties = properties
+        this.legacyUserId = userFields.legacyUserId
+        this.impersonatorUserId = userFields.impersonatorUserId
+        this.properties = userFields.properties
     }
 
     public getOrg(orgId: string): UserOrgInfo | undefined {
@@ -139,21 +140,20 @@ export class UserClass {
             orgIdToUserOrgInfo[orgId] = UserOrgInfo.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
         }
         try {
-            return new UserClass(
-                obj.userId,
-                obj.email,
-                obj.createdAt,
-                orgIdToUserOrgInfo,
-                obj.firstName,
-                obj.lastName,
-                obj.username,
-                obj.legacyUserId,
-                obj.impersonatorUserId,
-                obj.properties,
-                obj.pictureUrl,
-                obj.hasPassword,
-                obj.hasMfaEnabled
-            )
+            return new UserClass({
+                userId: obj.userId,
+                email: obj.email,
+                createdAt: obj.createdAt,
+                firstName: obj.firstName,
+                lastName: obj.lastName,
+                username: obj.username,
+                legacyUserId: obj.legacyUserId,
+                impersonatorUserId: obj.impersonatorUserId,
+                properties: obj.properties,
+                pictureUrl: obj.pictureUrl,
+                hasPassword: obj.hasPassword,
+                hasMfaEnabled: obj.hasMfaEnabled,
+            })
         } catch (e) {
             console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)
             throw e

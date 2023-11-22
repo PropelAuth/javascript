@@ -1,7 +1,7 @@
 import { AccessHelper, getAccessHelper } from "./access_helper"
 import { OrgIdToOrgMemberInfo } from "./org"
 import { getOrgHelper, OrgHelper } from "./org_helper"
-import { User as UserClass } from "./user"
+import { UserClass } from "./user"
 
 export type User = {
     userId: string
