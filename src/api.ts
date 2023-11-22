@@ -1,26 +1,27 @@
-import {OrgIdToOrgMemberInfo} from "./org"
-import {getOrgHelper, OrgHelper} from "./org_helper";
-import {getAccessHelper, AccessHelper} from "./access_helper";
+import { AccessHelper, getAccessHelper } from "./access_helper"
+import { OrgIdToOrgMemberInfo } from "./org"
+import { getOrgHelper, OrgHelper } from "./org_helper"
+import { UserClass } from "./user"
 
 export type User = {
     userId: string
 
     email: string
-    emailConfirmed: boolean,
+    emailConfirmed: boolean
 
-    hasPassword: boolean,
+    hasPassword: boolean
 
     username?: string
-    firstName?: string,
-    lastName?: string,
-    pictureUrl?: string,
+    firstName?: string
+    lastName?: string
+    pictureUrl?: string
 
-    locked: boolean,
-    enabled: boolean,
-    mfaEnabled: boolean,
+    locked: boolean
+    enabled: boolean
+    mfaEnabled: boolean
 
-    createdAt: number,
-    lastActiveAt: number,
+    createdAt: number
+    lastActiveAt: number
 
     legacyUserId?: string
     properties?: { [key: string]: unknown }
@@ -38,12 +39,12 @@ export type AuthenticationInfo = {
      */
     orgIdToOrgMemberInfo?: OrgIdToOrgMemberInfo
     user: User
+    userClass: UserClass
 
     // If someone on your team is impersonating another user, this will be set to the employee's ID
     // By default, user impersonation is turned off and this will be undefined
     impersonatorUserId?: string
 }
-
 
 export type LogoutResponse = {
     redirect_to: string
@@ -103,23 +104,26 @@ export function logout(authUrl: string): Promise<LogoutResponse> {
 }
 
 function parseResponse(res: Response): Promise<AuthenticationInfo> {
-    return res.text().then(httpResponse => {
-        try {
-            return parseJsonConvertingSnakeToCamel(httpResponse)
-        } catch (e) {
+    return res.text().then(
+        (httpResponse) => {
+            try {
+                return parseJsonConvertingSnakeToCamel(httpResponse)
+            } catch (e) {
+                console.error("Unable to process authentication response", e)
+                return Promise.reject({
+                    status: 500,
+                    message: "Unable to process authentication response",
+                })
+            }
+        },
+        (e) => {
             console.error("Unable to process authentication response", e)
             return Promise.reject({
                 status: 500,
                 message: "Unable to process authentication response",
             })
         }
-    }, e => {
-        console.error("Unable to process authentication response", e)
-        return Promise.reject({
-            status: 500,
-            message: "Unable to process authentication response",
-        })
-    })
+    )
 }
 
 // The API responds with snake_case, but TypeScript convention is camelCase.
@@ -177,7 +181,7 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
 function logCorsError() {
     console.error(
         "Request to PropelAuth failed due to a CORS error. There are a few likely causes: \n" +
-        " 1. In the Frontend Integration section of your dashboard, make sure your requests are coming either the specified Application URL or localhost with a matching port.\n" +
-        " 2. Make sure your server is hosted on HTTPS in production."
+            " 1. In the Frontend Integration section of your dashboard, make sure your requests are coming either the specified Application URL or localhost with a matching port.\n" +
+            " 2. Make sure your server is hosted on HTTPS in production."
     )
 }
