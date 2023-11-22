@@ -21,6 +21,7 @@
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@types/jest": "^26.0.23",
+    "@types/js-cookie": "^3.0.6",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "babel-loader": "^8.2.2",
@@ -51,5 +52,9 @@
   "files": [
     "dist"
   ],
-  "types": "dist/types/index.d.ts"
+  "types": "dist/types/index.d.ts",
+  "dependencies": {
+    "@propelauth/backend-js-utilities": "^0.0.2",
+    "js-cookie": "^3.0.5"
+  }
 }
