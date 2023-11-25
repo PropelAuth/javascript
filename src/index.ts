@@ -1,8 +1,10 @@
 export type { AccessHelper, AccessHelperWithOrg } from "./access_helper"
-export type { AuthenticationInfo } from "./api"
+export type { AuthenticationInfo, User } from "./api"
 export { createClient } from "./client"
 export type { IAuthClient, IAuthOptions, RedirectToLoginOptions, RedirectToSignupOptions } from "./client"
 export { getActiveOrgId, setActiveOrgId } from "./org"
 export type { OrgIdToOrgMemberInfo, OrgMemberInfo } from "./org"
 export type { OrgHelper } from "./org_helper"
+export type { OrgIdToUserOrgInfo } from "./user"
 export { UserClass, UserOrgInfo } from "./user"
+
