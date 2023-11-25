@@ -164,7 +164,7 @@ export class UserClass {
     }
 }
 
-interface OrgIdToUserOrgInfo {
+export interface OrgIdToUserOrgInfo {
     [orgId: string]: UserOrgInfo
 }
 
