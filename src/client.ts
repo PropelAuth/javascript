@@ -3,8 +3,8 @@ import {currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow} f
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
-const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 4 * 60
-const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 4 * 60
+const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
+const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
 
 export interface RedirectToSignupOptions {
     postSignupRedirectUrl: string
@@ -107,6 +107,16 @@ export interface IAuthClient {
     removeLoggedInChangeObserver(observer: (isLoggedIn: boolean) => void): void
 
     /**
+     * Adds an observer which is called whenever the access token changes.
+     */
+    addAccessTokenChangeObserver(observer: (accessToken: string | undefined) => void): void
+
+    /**
+     * Removes the observer
+     */
+    removeAccessTokenChangeObserver(observer: (accessToken: string | undefined) => void): void
+
+    /**
      * Cleanup the auth client if you no longer need it.
      */
     destroy(): void
@@ -131,6 +141,7 @@ interface ClientState {
     initialLoadFinished: boolean
     authenticationInfo: AuthenticationInfo | null
     observers: ((isLoggedIn: boolean) => void)[]
+    accessTokenObservers: ((accessToken: string | undefined) => void)[]
     lastLoggedInAtMessage: number | null
     lastLoggedOutAtMessage: number | null
     refreshInterval: number | null
@@ -161,6 +172,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         initialLoadFinished: false,
         authenticationInfo: null,
         observers: [],
+        accessTokenObservers: [],
         lastLoggedInAtMessage: getLocalStorageNumber(LOGGED_IN_AT_KEY),
         lastLoggedOutAtMessage: getLocalStorageNumber(LOGGED_OUT_AT_KEY),
         authUrl: authOptions.authUrl,
@@ -174,6 +186,15 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             const observer = clientState.observers[i]
             if (observer) {
                 observer(isLoggedIn)
+            }
+        }
+    }
+
+    function notifyObserversOfAccessTokenChange(accessToken: string | undefined) {
+        for (let i = 0; i < clientState.accessTokenObservers.length; i++) {
+            const observer = clientState.accessTokenObservers[i]
+            if (observer) {
+                observer(accessToken)
             }
         }
     }
@@ -215,6 +236,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         } else if (userJustLoggedIn(accessToken, previousAccessToken)) {
             notifyObservers(true)
             updateLastLoggedInAt()
+        }
+
+        if (previousAccessToken !== accessToken) {
+            notifyObserversOfAccessTokenChange(accessToken)
         }
 
         clientState.lastRefresh = currentTimeSeconds()
@@ -295,6 +320,26 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
                 console.error("Cannot find observer to remove")
             } else {
                 clientState.observers.splice(observerIndex, 1)
+            }
+        },
+
+        addAccessTokenChangeObserver(observer: (accessToken: (string | undefined)) => void) {
+            const hasObserver = clientState.accessTokenObservers.includes(observer)
+            if (hasObserver) {
+                console.error("Observer has been attached already.")
+            } else if (!observer) {
+                console.error("Cannot add a null observer")
+            } else {
+                clientState.accessTokenObservers.push(observer)
+            }
+        },
+
+        removeAccessTokenChangeObserver(observer: (accessToken: (string | undefined)) => void) {
+            const observerIndex = clientState.accessTokenObservers.indexOf(observer)
+            if (observerIndex === -1) {
+                console.error("Cannot find observer to remove")
+            } else {
+                clientState.accessTokenObservers.splice(observerIndex, 1)
             }
         },
 
