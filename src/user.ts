@@ -1,8 +1,8 @@
 import { OrgIdToOrgMemberInfo } from "./org"
 
-type UserProperties = { [key: string]: unknown }
+export type UserProperties = { [key: string]: unknown }
 
-interface UserFields {
+export interface UserFields {
     userId: string
     email: string
     createdAt: number
@@ -13,6 +13,7 @@ interface UserFields {
     pictureUrl?: string
     hasPassword?: boolean
     hasMfaEnabled?: boolean
+    canCreateOrgs?: boolean
     legacyUserId?: string
     impersonatorUserId?: string
 }
@@ -31,6 +32,7 @@ export class UserClass {
     public pictureUrl?: string
     public hasPassword?: boolean
     public hasMfaEnabled?: boolean
+    public canCreateOrgs?: boolean
 
     // If you used our migration APIs to migrate this user from a different system,
     // this is their original ID from that system.
@@ -49,6 +51,7 @@ export class UserClass {
         this.pictureUrl = userFields.pictureUrl
         this.hasPassword = userFields.hasPassword
         this.hasMfaEnabled = userFields.hasMfaEnabled
+        this.canCreateOrgs = userFields.canCreateOrgs
 
         this.legacyUserId = userFields.legacyUserId
         this.impersonatorUserId = userFields.impersonatorUserId
@@ -156,6 +159,7 @@ export class UserClass {
                     pictureUrl: obj.pictureUrl,
                     hasPassword: obj.hasPassword,
                     hasMfaEnabled: obj.hasMfaEnabled,
+                    canCreateOrgs: obj.canCreateOrgs,
                 },
                 orgIdToUserOrgInfo
             )

@@ -186,7 +186,21 @@ function withExtraArgs(authInfoWithoutExtraArgs: AuthenticationInfo): Promise<Au
         authInfoWithoutExtraArgs.accessHelper = getAccessHelper(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
     }
     authInfoWithoutExtraArgs.userClass = new UserClass(
-        authInfoWithoutExtraArgs.user,
+        {
+            userId: authInfoWithoutExtraArgs.user.userId,
+            email: authInfoWithoutExtraArgs.user.email,
+            createdAt: authInfoWithoutExtraArgs.user.createdAt,
+            firstName: authInfoWithoutExtraArgs.user.firstName,
+            lastName: authInfoWithoutExtraArgs.user.lastName,
+            username: authInfoWithoutExtraArgs.user.username,
+            properties: authInfoWithoutExtraArgs.user.properties,
+            pictureUrl: authInfoWithoutExtraArgs.user.pictureUrl,
+            hasPassword: authInfoWithoutExtraArgs.user.hasPassword,
+            hasMfaEnabled: authInfoWithoutExtraArgs.user.mfaEnabled,
+            canCreateOrgs: authInfoWithoutExtraArgs.user.canCreateOrgs,
+            legacyUserId: authInfoWithoutExtraArgs.user.legacyUserId,
+            impersonatorUserId: authInfoWithoutExtraArgs.impersonatorUserId,
+        },
         convertOrgIdToOrgMemberInfo(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
     )
     return Promise.resolve(authInfoWithoutExtraArgs)
