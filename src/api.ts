@@ -1,7 +1,7 @@
 import { AccessHelper, getAccessHelper } from "./access_helper"
 import { OrgIdToOrgMemberInfo } from "./org"
 import { getOrgHelper, OrgHelper } from "./org_helper"
-import { UserClass } from "./user"
+import { convertOrgIdToOrgMemberInfo, UserClass } from "./user"
 
 export type User = {
     userId: string
@@ -19,6 +19,7 @@ export type User = {
     locked: boolean
     enabled: boolean
     mfaEnabled: boolean
+    canCreateOrgs: boolean
 
     createdAt: number
     lastActiveAt: number
@@ -107,7 +108,8 @@ function parseResponse(res: Response): Promise<AuthenticationInfo> {
     return res.text().then(
         (httpResponse) => {
             try {
-                return parseJsonConvertingSnakeToCamel(httpResponse)
+                const authInfoWithoutUserClass = parseJsonConvertingSnakeToCamel(httpResponse)
+                return withExtraArgs(authInfoWithoutUserClass)
             } catch (e) {
                 console.error("Unable to process authentication response", e)
                 return Promise.reject({
@@ -148,8 +150,6 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.expiresAtSeconds = value
         } else if (key === "org_id_to_org_member_info") {
             this.orgIdToOrgMemberInfo = value
-            this.orgHelper = getOrgHelper(value)
-            this.accessHelper = getAccessHelper(value)
         } else if (key === "user_id") {
             this.userId = value
         } else if (key === "email_confirmed") {
@@ -164,6 +164,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.mfaEnabled = value
         } else if (key === "has_password") {
             this.hasPassword = value
+        } else if (key === "can_create_orgs") {
+            this.canCreateOrgs = value
         } else if (key === "created_at") {
             this.createdAt = value
         } else if (key === "last_active_at") {
@@ -176,6 +178,32 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             return value
         }
     })
+}
+
+function withExtraArgs(authInfoWithoutExtraArgs: AuthenticationInfo): Promise<AuthenticationInfo> {
+    if (authInfoWithoutExtraArgs.orgIdToOrgMemberInfo) {
+        authInfoWithoutExtraArgs.orgHelper = getOrgHelper(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
+        authInfoWithoutExtraArgs.accessHelper = getAccessHelper(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
+    }
+    authInfoWithoutExtraArgs.userClass = new UserClass(
+        {
+            userId: authInfoWithoutExtraArgs.user.userId,
+            email: authInfoWithoutExtraArgs.user.email,
+            createdAt: authInfoWithoutExtraArgs.user.createdAt,
+            firstName: authInfoWithoutExtraArgs.user.firstName,
+            lastName: authInfoWithoutExtraArgs.user.lastName,
+            username: authInfoWithoutExtraArgs.user.username,
+            properties: authInfoWithoutExtraArgs.user.properties,
+            pictureUrl: authInfoWithoutExtraArgs.user.pictureUrl,
+            hasPassword: authInfoWithoutExtraArgs.user.hasPassword,
+            hasMfaEnabled: authInfoWithoutExtraArgs.user.mfaEnabled,
+            canCreateOrgs: authInfoWithoutExtraArgs.user.canCreateOrgs,
+            legacyUserId: authInfoWithoutExtraArgs.user.legacyUserId,
+            impersonatorUserId: authInfoWithoutExtraArgs.impersonatorUserId,
+        },
+        convertOrgIdToOrgMemberInfo(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
+    )
+    return Promise.resolve(authInfoWithoutExtraArgs)
 }
 
 function logCorsError() {
