@@ -5,6 +5,5 @@ export type { IAuthClient, IAuthOptions, RedirectToLoginOptions, RedirectToSignu
 export { getActiveOrgId, setActiveOrgId } from "./org"
 export type { OrgIdToOrgMemberInfo, OrgMemberInfo } from "./org"
 export type { OrgHelper } from "./org_helper"
-export type { OrgIdToUserOrgInfo } from "./user"
-export { UserClass, UserOrgInfo } from "./user"
-
+export { OrgMemberInfoClass, UserClass } from "./user"
+export type { OrgIdToOrgMemberInfoClass } from "./user"

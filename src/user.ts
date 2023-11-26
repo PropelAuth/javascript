@@ -1,3 +1,5 @@
+import { OrgIdToOrgMemberInfo } from "./org"
+
 type UserProperties = { [key: string]: unknown }
 
 interface UserFields {
@@ -17,7 +19,7 @@ interface UserFields {
 
 export class UserClass {
     public userId: string
-    public orgIdToUserOrgInfo?: OrgIdToUserOrgInfo
+    public orgIdToUserOrgInfo?: OrgIdToOrgMemberInfoClass
 
     // Metadata about the user
     public email: string
@@ -35,7 +37,7 @@ export class UserClass {
     public legacyUserId?: string
     public impersonatorUserId?: string
 
-    constructor(userFields: UserFields, orgIdToUserOrgInfo?: OrgIdToUserOrgInfo) {
+    constructor(userFields: UserFields, orgIdToUserOrgInfo?: OrgIdToOrgMemberInfoClass) {
         this.userId = userFields.userId
         this.orgIdToUserOrgInfo = orgIdToUserOrgInfo
 
@@ -53,7 +55,7 @@ export class UserClass {
         this.properties = userFields.properties
     }
 
-    public getOrg(orgId: string): UserOrgInfo | undefined {
+    public getOrg(orgId: string): OrgMemberInfoClass | undefined {
         if (!this.orgIdToUserOrgInfo) {
             return undefined
         }
@@ -61,7 +63,7 @@ export class UserClass {
         return this.orgIdToUserOrgInfo[orgId]
     }
 
-    public getOrgByName(orgName: string): UserOrgInfo | undefined {
+    public getOrgByName(orgName: string): OrgMemberInfoClass | undefined {
         if (!this.orgIdToUserOrgInfo) {
             return undefined
         }
@@ -85,7 +87,7 @@ export class UserClass {
         return this.properties[key]
     }
 
-    public getOrgs(): UserOrgInfo[] {
+    public getOrgs(): OrgMemberInfoClass[] {
         if (!this.orgIdToUserOrgInfo) {
             return []
         }
@@ -135,9 +137,9 @@ export class UserClass {
 
     public static fromJSON(json: string): UserClass {
         const obj = JSON.parse(json)
-        const orgIdToUserOrgInfo: OrgIdToUserOrgInfo = {}
+        const orgIdToUserOrgInfo: OrgIdToOrgMemberInfoClass = {}
         for (const orgId in obj.orgIdToUserOrgInfo) {
-            orgIdToUserOrgInfo[orgId] = UserOrgInfo.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
+            orgIdToUserOrgInfo[orgId] = OrgMemberInfoClass.fromJSON(JSON.stringify(obj.orgIdToUserOrgInfo[orgId]))
         }
         try {
             return new UserClass(
@@ -158,17 +160,17 @@ export class UserClass {
                 orgIdToUserOrgInfo
             )
         } catch (e) {
-            console.error("Unable to parse User. Make sure the JSON string is a stringified `User` type.", e)
+            console.error("Unable to parse User. Make sure the JSON string is a stringified `UserClass` type.", e)
             throw e
         }
     }
 }
 
-export interface OrgIdToUserOrgInfo {
-    [orgId: string]: UserOrgInfo
+export interface OrgIdToOrgMemberInfoClass {
+    [orgId: string]: OrgMemberInfoClass
 }
 
-export class UserOrgInfo {
+export class OrgMemberInfoClass {
     public orgId: string
     public orgName: string
     public orgMetadata: { [key: string]: any }
@@ -214,10 +216,10 @@ export class UserOrgInfo {
         return permissions.every((permission) => this.hasPermission(permission))
     }
 
-    public static fromJSON(json: string): UserOrgInfo {
+    public static fromJSON(json: string): OrgMemberInfoClass {
         const obj = JSON.parse(json)
         try {
-            return new UserOrgInfo(
+            return new OrgMemberInfoClass(
                 obj.orgId,
                 obj.orgName,
                 obj.orgMetadata,
@@ -234,4 +236,25 @@ export class UserOrgInfo {
             throw e
         }
     }
+}
+
+export function convertOrgIdToOrgMemberInfo(
+    orgIdToOrgMemberInfo: OrgIdToOrgMemberInfo | undefined
+): OrgIdToOrgMemberInfoClass | undefined {
+    if (orgIdToOrgMemberInfo === undefined) {
+        return undefined
+    }
+    const orgIdToUserOrgInfo: OrgIdToOrgMemberInfoClass = {}
+    for (const orgMemberInfo of Object.values(orgIdToOrgMemberInfo)) {
+        orgIdToUserOrgInfo[orgMemberInfo.orgId] = new OrgMemberInfoClass(
+            orgMemberInfo.orgId,
+            orgMemberInfo.orgName,
+            {},
+            orgMemberInfo.urlSafeOrgName,
+            orgMemberInfo.userAssignedRole,
+            orgMemberInfo.userInheritedRolesPlusCurrentRole,
+            orgMemberInfo.userPermissions
+        )
+    }
+    return orgIdToUserOrgInfo
 }

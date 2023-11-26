@@ -1,5 +1,5 @@
-import {AuthenticationInfo, fetchAuthenticationInfo, logout} from "./api"
-import {currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow} from "./helpers"
+import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
+import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
@@ -94,7 +94,6 @@ export interface IAuthClient {
      * Redirects the user to the SAML configuration page.
      */
     redirectToSetupSAMLPage(orgId: string): void
-
 
     /**
      * Adds an observer which is called whenever the users logs in or logs out.
@@ -267,8 +266,8 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     const getSignupPageUrl = (options?: RedirectToSignupOptions) => {
         let qs = ""
         if (options && options.postSignupRedirectUrl) {
-            const encode = window ? window.btoa : btoa;
-            qs = new URLSearchParams({"rt": encode(options.postSignupRedirectUrl)}).toString()
+            const encode = window ? window.btoa : btoa
+            qs = new URLSearchParams({ rt: encode(options.postSignupRedirectUrl) }).toString()
         }
         return `${clientState.authUrl}/signup?${qs}`
     }
@@ -276,8 +275,8 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     const getLoginPageUrl = (options?: RedirectToLoginOptions) => {
         let qs = ""
         if (options && options.postLoginRedirectUrl) {
-            const encode = window ? window.btoa : btoa;
-            qs = new URLSearchParams({"rt": encode(options.postLoginRedirectUrl)}).toString()
+            const encode = window ? window.btoa : btoa
+            qs = new URLSearchParams({ rt: encode(options.postLoginRedirectUrl) }).toString()
         }
         return `${clientState.authUrl}/login?${qs}`
     }
@@ -323,7 +322,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
         },
 
-        addAccessTokenChangeObserver(observer: (accessToken: (string | undefined)) => void) {
+        addAccessTokenChangeObserver(observer: (accessToken: string | undefined) => void) {
             const hasObserver = clientState.accessTokenObservers.includes(observer)
             if (hasObserver) {
                 console.error("Observer has been attached already.")
@@ -334,7 +333,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
         },
 
-        removeAccessTokenChangeObserver(observer: (accessToken: (string | undefined)) => void) {
+        removeAccessTokenChangeObserver(observer: (accessToken: string | undefined) => void) {
             const observerIndex = clientState.accessTokenObservers.indexOf(observer)
             if (observerIndex === -1) {
                 console.error("Cannot find observer to remove")
@@ -420,6 +419,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
 
         destroy() {
             clientState.observers = []
+            clientState.accessTokenObservers = []
             window.removeEventListener("storage", onStorageChange)
             if (clientState.refreshInterval) {
                 clearInterval(clientState.refreshInterval)
@@ -457,7 +457,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     // If we were offline or on a different tab, when we return, refetch auth info
     // Some browsers trigger focus more often than we'd like, so we'll debounce a little here as well
     const onOnlineOrFocus = async function () {
-        if (clientState.lastRefresh && currentTimeSeconds() > clientState.lastRefresh + DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS) {
+        if (
+            clientState.lastRefresh &&
+            currentTimeSeconds() > clientState.lastRefresh + DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS
+        ) {
             await forceRefreshToken(true)
         } else {
             await client.getAuthenticationInfoOrNull()
