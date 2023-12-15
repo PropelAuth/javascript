@@ -7,7 +7,8 @@ const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
 const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
 
 export interface RedirectToSignupOptions {
-    postSignupRedirectUrl: string
+    postSignupRedirectUrl?: string
+    userSignupQueryParameters?: Record<string, string>
 }
 
 export interface RedirectToLoginOptions {
@@ -264,12 +265,24 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     }
 
     const getSignupPageUrl = (options?: RedirectToSignupOptions) => {
-        let qs = ""
-        if (options && options.postSignupRedirectUrl) {
+        let qs = new URLSearchParams()
+        let url = `${clientState.authUrl}/signup`
+        if (options) {
             const encode = window ? window.btoa : btoa
-            qs = new URLSearchParams({ rt: encode(options.postSignupRedirectUrl) }).toString()
+            const { postSignupRedirectUrl, userSignupQueryParameters } = options
+            if (postSignupRedirectUrl) {
+                qs.set("rt", encode(postSignupRedirectUrl))
+            }
+            if (userSignupQueryParameters) {
+                Object.entries(userSignupQueryParameters).forEach(([key, value]) => {
+                    qs.set(key, value)
+                })
+            }
         }
-        return `${clientState.authUrl}/signup?${qs}`
+        if (qs.toString()) {
+            url += `?${qs.toString()}`
+        }
+        return url
     }
 
     const getLoginPageUrl = (options?: RedirectToLoginOptions) => {
