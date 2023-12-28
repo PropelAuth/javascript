@@ -7,11 +7,13 @@ const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
 const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
 
 export interface RedirectToSignupOptions {
-    postSignupRedirectUrl: string
+    postSignupRedirectUrl?: string
+    userSignupQueryParameters?: Record<string, string>
 }
 
 export interface RedirectToLoginOptions {
-    postLoginRedirectUrl: string
+    postLoginRedirectUrl?: string
+    userSignupQueryParameters?: Record<string, string>
 }
 
 export interface IAuthClient {
@@ -264,21 +266,45 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     }
 
     const getSignupPageUrl = (options?: RedirectToSignupOptions) => {
-        let qs = ""
-        if (options && options.postSignupRedirectUrl) {
+        let qs = new URLSearchParams()
+        let url = `${clientState.authUrl}/signup`
+        if (options) {
             const encode = window ? window.btoa : btoa
-            qs = new URLSearchParams({ rt: encode(options.postSignupRedirectUrl) }).toString()
+            const { postSignupRedirectUrl, userSignupQueryParameters } = options
+            if (postSignupRedirectUrl) {
+                qs.set("rt", encode(postSignupRedirectUrl))
+            }
+            if (userSignupQueryParameters) {
+                Object.entries(userSignupQueryParameters).forEach(([key, value]) => {
+                    qs.set(key, value)
+                })
+            }
         }
-        return `${clientState.authUrl}/signup?${qs}`
+        if (qs.toString()) {
+            url += `?${qs.toString()}`
+        }
+        return url
     }
 
     const getLoginPageUrl = (options?: RedirectToLoginOptions) => {
-        let qs = ""
-        if (options && options.postLoginRedirectUrl) {
+        let qs = new URLSearchParams()
+        let url = `${clientState.authUrl}/login`
+        if (options) {
             const encode = window ? window.btoa : btoa
-            qs = new URLSearchParams({ rt: encode(options.postLoginRedirectUrl) }).toString()
+            const { postLoginRedirectUrl, userSignupQueryParameters } = options
+            if (postLoginRedirectUrl) {
+                qs.set("rt", encode(postLoginRedirectUrl))
+            }
+            if (userSignupQueryParameters) {
+                Object.entries(userSignupQueryParameters).forEach(([key, value]) => {
+                    qs.set(key, value)
+                })
+            }
         }
-        return `${clientState.authUrl}/login?${qs}`
+        if (qs.toString()) {
+            url += `?${qs.toString()}`
+        }
+        return url
     }
 
     const getAccountPageUrl = () => {
