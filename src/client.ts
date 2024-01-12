@@ -1,4 +1,3 @@
-import { Buffer } from "buffer"
 import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
 import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
 
@@ -8,7 +7,8 @@ const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
 const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
 
 const encodeBase64 = (str: string) => {
-    return Buffer.from(str).toString("base64")
+    const encode = window ? window.btoa : btoa
+    return encode(str)
 }
 
 export interface RedirectToSignupOptions {
@@ -282,10 +282,9 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         let qs = new URLSearchParams()
         let url = `${clientState.authUrl}/signup`
         if (options) {
-            const encode = window ? window.btoa : btoa
             const { postSignupRedirectUrl, userSignupQueryParameters } = options
             if (postSignupRedirectUrl) {
-                qs.set("rt", encode(postSignupRedirectUrl))
+                qs.set("rt", encodeBase64(postSignupRedirectUrl))
             }
             if (userSignupQueryParameters) {
                 Object.entries(userSignupQueryParameters).forEach(([key, value]) => {
@@ -303,10 +302,9 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         let qs = new URLSearchParams()
         let url = `${clientState.authUrl}/login`
         if (options) {
-            const encode = window ? window.btoa : btoa
             const { postLoginRedirectUrl, userSignupQueryParameters } = options
             if (postLoginRedirectUrl) {
-                qs.set("rt", encode(postLoginRedirectUrl))
+                qs.set("rt", encodeBase64(postLoginRedirectUrl))
             }
             if (userSignupQueryParameters) {
                 Object.entries(userSignupQueryParameters).forEach(([key, value]) => {
