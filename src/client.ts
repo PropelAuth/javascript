@@ -29,6 +29,14 @@ export interface RedirectToCreateOrgOptions {
     redirectBackToUrl?: string
 }
 
+export interface RedirectToOrgPageOptions {
+    redirectBackToUrl?: string
+}
+
+export interface RedirectToSetupSAMLPageOptions {
+    redirectBackToUrl?: string
+}
+
 export interface IAuthClient {
     /**
      * If the user is logged in, this method returns an access token, the time (in seconds) that the token will expire,
@@ -67,7 +75,7 @@ export interface IAuthClient {
      * Gets the URL for the hosted organization page.
      * @param orgId The ID of the organization's page to load. If not specified, a random one will be used instead.
      */
-    getOrgPageUrl(orgId?: string, redirectBackToUrl?: string): string
+    getOrgPageUrl(orgId?: string, options?: RedirectToOrgPageOptions): string
 
     /**
      * Gets the URL for the hosted create organization page.
@@ -98,7 +106,7 @@ export interface IAuthClient {
      * Redirects the user to the organization page.
      * @param orgId The ID of the organization"s page to load. If not specified, a random one will be used instead.
      */
-    redirectToOrgPage(orgId?: string, redirectBackToUrl?: string): void
+    redirectToOrgPage(orgId?: string, options?: RedirectToOrgPageOptions): void
 
     /**
      * Redirects the user to the create organization page.
@@ -334,15 +342,19 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         return url
     }
 
-    const getOrgPageUrl = (orgId?: string, redirectBackToUrl?: string) => {
+    const getOrgPageUrl = (orgId?: string, options?: RedirectToOrgPageOptions) => {
         let qs = new URLSearchParams()
         let url = `${clientState.authUrl}/org`
-        if (redirectBackToUrl) {
-            qs.set("rt", encodeBase64(redirectBackToUrl))
-        }
         if (orgId) {
             qs.set("id", orgId)
         }
+
+        if (options) {
+            if (options.redirectBackToUrl) {
+                qs.set("rt", encodeBase64(options.redirectBackToUrl))
+            }
+        }
+
         if (qs.toString()) {
             url += `?${qs.toString()}`
         }
@@ -364,10 +376,12 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         return url
     }
 
-    const getSetupSAMLPageUrl = (orgId: string, redirectBackToUrl?: string) => {
+    const getSetupSAMLPageUrl = (orgId: string, options?: RedirectToSetupSAMLPageOptions) => {
         let qs = new URLSearchParams()
-        if (redirectBackToUrl) {
-            qs.set("rt", encodeBase64(redirectBackToUrl))
+        if (options) {
+            if (options.redirectBackToUrl) {
+                qs.set("rt", encodeBase64(options.redirectBackToUrl))
+            }
         }
         qs.set("id", orgId)
 
@@ -446,16 +460,16 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             return getAccountPageUrl(options)
         },
 
-        getOrgPageUrl(orgId?: string, redirectBackToUrl?: string): string {
-            return getOrgPageUrl(orgId, redirectBackToUrl)
+        getOrgPageUrl(orgId?: string, options?: RedirectToOrgPageOptions): string {
+            return getOrgPageUrl(orgId, options)
         },
 
         getCreateOrgPageUrl(options?: RedirectToCreateOrgOptions): string {
             return getCreateOrgPageUrl(options)
         },
 
-        getSetupSAMLPageUrl(orgId: string, redirectBackToUrl?: string): string {
-            return getSetupSAMLPageUrl(orgId, redirectBackToUrl)
+        getSetupSAMLPageUrl(orgId: string, options?: RedirectToSetupSAMLPageOptions): string {
+            return getSetupSAMLPageUrl(orgId, options)
         },
 
         redirectToSignupPage(options?: RedirectToSignupOptions): void {
@@ -470,16 +484,16 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             window.location.href = getAccountPageUrl(options)
         },
 
-        redirectToOrgPage(orgId?: string, redirectBackToUrl?: string): void {
-            window.location.href = getOrgPageUrl(orgId, redirectBackToUrl)
+        redirectToOrgPage(orgId?: string, options?: RedirectToOrgPageOptions): void {
+            window.location.href = getOrgPageUrl(orgId, options)
         },
 
         redirectToCreateOrgPage(options?: RedirectToCreateOrgOptions): void {
             window.location.href = getCreateOrgPageUrl(options)
         },
 
-        redirectToSetupSAMLPage(orgId: string, redirectBackToUrl?: string) {
-            window.location.href = getSetupSAMLPageUrl(orgId, redirectBackToUrl)
+        redirectToSetupSAMLPage(orgId: string, options?: RedirectToSetupSAMLPageOptions) {
+            window.location.href = getSetupSAMLPageUrl(orgId, options)
         },
 
         async logout(redirectAfterLogout: boolean): Promise<void> {

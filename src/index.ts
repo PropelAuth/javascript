@@ -7,6 +7,8 @@ export type {
     RedirectToAccountOptions,
     RedirectToCreateOrgOptions,
     RedirectToLoginOptions,
+    RedirectToOrgPageOptions,
+    RedirectToSetupSAMLPageOptions,
     RedirectToSignupOptions,
 } from "./client"
 export { ACTIVE_ORG_ID_COOKIE_NAME } from "./cookies"
