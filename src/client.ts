@@ -116,7 +116,7 @@ export interface IAuthClient {
     /**
      * Redirects the user to the SAML configuration page.
      */
-    redirectToSetupSAMLPage(orgId: string): void
+    redirectToSetupSAMLPage(orgId: string, options?: RedirectToSetupSAMLPageOptions): void
 
     /**
      * Adds an observer which is called whenever the users logs in or logs out.
