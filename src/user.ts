@@ -164,6 +164,7 @@ export class UserClass {
                     hasPassword: obj.hasPassword,
                     hasMfaEnabled: obj.hasMfaEnabled,
                     canCreateOrgs: obj.canCreateOrgs,
+                    loginMethod: obj.loginMethod,
                 },
                 orgIdToUserOrgInfo
             )
