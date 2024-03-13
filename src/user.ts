@@ -1,4 +1,5 @@
 import { OrgIdToOrgMemberInfo } from "./org"
+import { LoginMethod } from "./login_method"
 
 export type UserProperties = { [key: string]: unknown }
 
@@ -16,6 +17,7 @@ export interface UserFields {
     canCreateOrgs?: boolean
     legacyUserId?: string
     impersonatorUserId?: string
+    loginMethod?: LoginMethod
 }
 
 export class UserClass {
@@ -33,6 +35,7 @@ export class UserClass {
     public hasPassword?: boolean
     public hasMfaEnabled?: boolean
     public canCreateOrgs?: boolean
+    public loginMethod?: LoginMethod
 
     // If you used our migration APIs to migrate this user from a different system,
     // this is their original ID from that system.
@@ -56,6 +59,7 @@ export class UserClass {
         this.legacyUserId = userFields.legacyUserId
         this.impersonatorUserId = userFields.impersonatorUserId
         this.properties = userFields.properties
+        this.loginMethod = userFields.loginMethod
     }
 
     public getOrg(orgId: string): OrgMemberInfoClass | undefined {
@@ -262,3 +266,4 @@ export function convertOrgIdToOrgMemberInfo(
     }
     return orgIdToUserOrgInfo
 }
+

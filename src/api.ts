@@ -1,4 +1,5 @@
 import { AccessHelper, getAccessHelper } from "./access_helper"
+import { LoginMethod } from "./login_method"
 import { OrgIdToOrgMemberInfo } from "./org"
 import { getOrgHelper, OrgHelper } from "./org_helper"
 import { convertOrgIdToOrgMemberInfo, UserClass } from "./user"
@@ -45,6 +46,7 @@ export type AuthenticationInfo = {
     // If someone on your team is impersonating another user, this will be set to the employee's ID
     // By default, user impersonation is turned off and this will be undefined
     impersonatorUserId?: string
+    loginMethod?: LoginMethod
 }
 
 export type LogoutResponse = {
@@ -176,6 +178,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.legacyUserId = value
         } else if (key === "impersonator_user") {
             this.impersonatorUserId = value
+        } else if (key === "login_method") {
+            this.loginMethod = value
         } else {
             return value
         }
@@ -202,6 +206,7 @@ function withExtraArgs(authInfoWithoutExtraArgs: AuthenticationInfo): Promise<Au
             canCreateOrgs: authInfoWithoutExtraArgs.user.canCreateOrgs,
             legacyUserId: authInfoWithoutExtraArgs.user.legacyUserId,
             impersonatorUserId: authInfoWithoutExtraArgs.impersonatorUserId,
+            loginMethod: authInfoWithoutExtraArgs.loginMethod ? authInfoWithoutExtraArgs.loginMethod : { loginMethod: "unknown" },
         },
         convertOrgIdToOrgMemberInfo(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
     )
