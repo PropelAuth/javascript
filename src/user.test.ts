@@ -23,6 +23,9 @@ const mockUser = new UserClass(
         properties: {
             property: "value",
         },
+        loginMethod: {
+            loginMethod: "password"
+        },
     },
     {
         mockOrgId: mockUserOrgInfo,
