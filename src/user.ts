@@ -253,7 +253,7 @@ export function convertOrgIdToOrgMemberInfo(
         orgIdToUserOrgInfo[orgMemberInfo.orgId] = new OrgMemberInfoClass(
             orgMemberInfo.orgId,
             orgMemberInfo.orgName,
-            {},
+            orgMemberInfo.orgMetadata,
             orgMemberInfo.urlSafeOrgName,
             orgMemberInfo.userAssignedRole,
             orgMemberInfo.userInheritedRolesPlusCurrentRole,

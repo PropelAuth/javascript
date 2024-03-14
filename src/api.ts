@@ -136,6 +136,8 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.orgId = value
         } else if (key === "org_name") {
             this.orgName = value
+        } else if (key === "org_metadata") {
+            this.orgMetadata = value
         } else if (key === "url_safe_org_name") {
             this.urlSafeOrgName = value
         } else if (key === "user_role") {
