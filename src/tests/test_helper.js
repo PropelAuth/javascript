@@ -25,6 +25,9 @@ export function createOrg() {
     return {
         orgId: uuidv4(),
         orgName,
+        orgMetadata: {
+            hello: "world",
+        },
         urlSafeOrgName,
         userAssignedRole: "Admin",
         userInheritedRolesPlusCurrentRole: ["Admin", "Member"],

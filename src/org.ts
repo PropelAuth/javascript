@@ -4,6 +4,7 @@ import { ACTIVE_ORG_ID_COOKIE_NAME } from "./cookies"
 export type OrgMemberInfo = {
     orgId: string
     orgName: string
+    orgMetadata: { [key: string]: any }
     urlSafeOrgName: string
     userAssignedRole: string
     userInheritedRolesPlusCurrentRole: string[]
