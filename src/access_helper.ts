@@ -1,4 +1,4 @@
-import {OrgIdToOrgMemberInfo} from "./org";
+import {OrgIdToOrgMemberInfo, OrgRoleStructure} from "./org";
 
 export type AccessHelper = {
     isRole: (orgId: string, role: string) => boolean
@@ -23,7 +23,11 @@ export function getAccessHelper(
         if (orgMemberInfo === undefined) {
             return false;
         }
-        return orgMemberInfo.userAssignedRole === role
+        if (orgMemberInfo.orgRoleStructure === OrgRoleStructure.MultiRole) {
+            return orgMemberInfo.userAssignedRole === role || orgMemberInfo.userAssignedAdditionalRoles.includes(role)
+        } else {
+            return orgMemberInfo.userAssignedRole === role
+        }
     }
     
     function isAtLeastRole(orgId: string, role: string): boolean {
@@ -31,7 +35,11 @@ export function getAccessHelper(
         if (orgMemberInfo === undefined) {
             return false;
         }
-        return orgMemberInfo.userInheritedRolesPlusCurrentRole.includes(role)
+        if (orgMemberInfo.orgRoleStructure === OrgRoleStructure.MultiRole) {
+            return orgMemberInfo.userAssignedRole === role || orgMemberInfo.userAssignedAdditionalRoles.includes(role)
+        } else {
+            return orgMemberInfo.userInheritedRolesPlusCurrentRole.includes(role)
+        }
     }
 
     function hasPermission(orgId: string, permission: string): boolean {
