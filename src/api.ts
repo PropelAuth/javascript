@@ -206,7 +206,7 @@ function withExtraArgs(authInfoWithoutExtraArgs: AuthenticationInfo): Promise<Au
             canCreateOrgs: authInfoWithoutExtraArgs.user.canCreateOrgs,
             legacyUserId: authInfoWithoutExtraArgs.user.legacyUserId,
             impersonatorUserId: authInfoWithoutExtraArgs.impersonatorUserId,
-            loginMethod: authInfoWithoutExtraArgs.loginMethod ? authInfoWithoutExtraArgs.loginMethod : { loginMethod: "unknown" },
+            loginMethod: authInfoWithoutExtraArgs.loginMethod ?? { loginMethod: "unknown" },
         },
         convertOrgIdToOrgMemberInfo(authInfoWithoutExtraArgs.orgIdToOrgMemberInfo)
     )
