@@ -13,7 +13,7 @@ export type {
 } from "./client"
 export { ACTIVE_ORG_ID_COOKIE_NAME } from "./cookies"
 export { getActiveOrgId, setActiveOrgId } from "./org"
-export type { OrgIdToOrgMemberInfo, OrgMemberInfo } from "./org"
+export type { OrgIdToOrgMemberInfo, OrgMemberInfo, OrgRoleStructure } from "./org"
 export type { OrgHelper } from "./org_helper"
 export { OrgMemberInfoClass, UserClass } from "./user"
 export type { OrgIdToOrgMemberInfoClass, UserFields, UserProperties } from "./user"

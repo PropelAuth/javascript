@@ -6,12 +6,19 @@ export type OrgMemberInfo = {
     orgName: string
     orgMetadata: { [key: string]: any }
     urlSafeOrgName: string
+    orgRoleStructure: OrgRoleStructure
     userAssignedRole: string
     userInheritedRolesPlusCurrentRole: string[]
     userPermissions: string[]
+    userAssignedAdditionalRoles: string[]
 }
 export type OrgIdToOrgMemberInfo = {
     [orgId: string]: OrgMemberInfo
+}
+
+export enum OrgRoleStructure {
+    SingleRole = "single_role_in_hierarchy",
+    MultiRole = "multi_role",
 }
 
 export const setActiveOrgId = (orgId: string) => {
