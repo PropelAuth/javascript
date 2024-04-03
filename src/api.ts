@@ -176,6 +176,10 @@ export function parseJsonConvertingSnakeToCamel(str: string): AuthenticationInfo
             this.legacyUserId = value
         } else if (key === "impersonator_user") {
             this.impersonatorUserId = value
+        } else if (key === "org_role_structure") {
+            this.orgRoleStructure = value
+        } else if (key === "additional_roles") {
+            this.userAssignedAdditionalRoles = value
         } else {
             return value
         }
