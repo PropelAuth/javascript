@@ -1,4 +1,4 @@
-import { OrgIdToOrgMemberInfo } from "./org"
+import { OrgIdToOrgMemberInfo, OrgRoleStructure } from "./org"
 
 export type UserProperties = { [key: string]: unknown }
 
@@ -179,10 +179,12 @@ export class OrgMemberInfoClass {
     public orgName: string
     public orgMetadata: { [key: string]: any }
     public urlSafeOrgName: string
+    public orgRoleStructure: OrgRoleStructure
 
     public userAssignedRole: string
     public userInheritedRolesPlusCurrentRole: string[]
     public userPermissions: string[]
+    public userAssignedAdditionalRoles: string[]
 
     constructor(
         orgId: string,
@@ -191,25 +193,37 @@ export class OrgMemberInfoClass {
         urlSafeOrgName: string,
         userAssignedRole: string,
         userInheritedRolesPlusCurrentRole: string[],
-        userPermissions: string[]
+        userPermissions: string[],
+        orgRoleStructure?: OrgRoleStructure,
+        userAssignedAdditionalRoles?: string[]
     ) {
         this.orgId = orgId
         this.orgName = orgName
         this.orgMetadata = orgMetadata
         this.urlSafeOrgName = urlSafeOrgName
+        this.orgRoleStructure = orgRoleStructure ?? OrgRoleStructure.SingleRole
 
         this.userAssignedRole = userAssignedRole
         this.userInheritedRolesPlusCurrentRole = userInheritedRolesPlusCurrentRole
         this.userPermissions = userPermissions
+        this.userAssignedAdditionalRoles = userAssignedAdditionalRoles ?? []
     }
 
     // validation methods
     public isRole(role: string): boolean {
-        return this.userAssignedRole === role
+        if (this.orgRoleStructure === OrgRoleStructure.MultiRole) {
+            return this.userAssignedRole === role || this.userAssignedAdditionalRoles.includes(role)
+        } else {
+            return this.userAssignedRole === role
+        }
     }
 
     public isAtLeastRole(role: string): boolean {
-        return this.userInheritedRolesPlusCurrentRole.includes(role)
+        if (this.orgRoleStructure === OrgRoleStructure.MultiRole) {
+            return this.userAssignedRole === role || this.userAssignedAdditionalRoles.includes(role)
+        } else {
+            return this.userInheritedRolesPlusCurrentRole.includes(role)
+        }
     }
 
     public hasPermission(permission: string): boolean {
@@ -230,7 +244,9 @@ export class OrgMemberInfoClass {
                 obj.urlSafeOrgName,
                 obj.userAssignedRole,
                 obj.userInheritedRolesPlusCurrentRole,
-                obj.userPermissions
+                obj.userPermissions,
+                obj.orgRoleStructure,
+                obj.userAssignedAdditionalRoles
             )
         } catch (e) {
             console.error(
@@ -257,7 +273,9 @@ export function convertOrgIdToOrgMemberInfo(
             orgMemberInfo.urlSafeOrgName,
             orgMemberInfo.userAssignedRole,
             orgMemberInfo.userInheritedRolesPlusCurrentRole,
-            orgMemberInfo.userPermissions
+            orgMemberInfo.userPermissions,
+            orgMemberInfo.orgRoleStructure,
+            orgMemberInfo.userAssignedAdditionalRoles
         )
     }
     return orgIdToUserOrgInfo

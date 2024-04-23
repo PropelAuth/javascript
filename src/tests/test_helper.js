@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 import { v4 as uuidv4 } from "uuid"
+import { OrgRoleStructure } from "../org"
 
 export function createOrgIdToOrgMemberInfo(orgs) {
     let orgIdToOrgMemberInfo = {}
@@ -11,10 +12,14 @@ export function createOrgIdToOrgMemberInfo(orgs) {
     return orgIdToOrgMemberInfo
 }
 
-export function createOrgs(numOrgs) {
+export function createOrgs(numOrgs, multiRole = false) {
     let orgs = []
     for (let i = 0; i < numOrgs; i++) {
-        orgs.push(createOrg())
+        if (multiRole) {
+            orgs.push(createOrgWithMultiRoles())
+        } else {
+            orgs.push(createOrg())
+        }
     }
     return orgs
 }
@@ -32,6 +37,24 @@ export function createOrg() {
         userAssignedRole: "Admin",
         userInheritedRolesPlusCurrentRole: ["Admin", "Member"],
         userPermissions: ["read", "write"],
+    }
+}
+
+export function createOrgWithMultiRoles() {
+    const orgName = randomString()
+    const urlSafeOrgName = orgName.toLowerCase()
+    return {
+        orgId: uuidv4(),
+        orgName,
+        orgMetadata: {
+            hello: "world",
+        },
+        urlSafeOrgName,
+        orgRoleStructure: OrgRoleStructure.MultiRole,
+        userAssignedRole: "Role A",
+        userInheritedRolesPlusCurrentRole: ["Role A"],
+        userPermissions: ["read", "write"],
+        userAssignedAdditionalRoles: ["Role B", "Role C"],
     }
 }
 

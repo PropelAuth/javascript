@@ -70,3 +70,48 @@ it("accessHelper validate wrapper methods work", async () => {
     expect(accessHelperWrapper.hasAllPermissions(["read", "write", "delete"])).toBeFalsy()
     expect(accessHelperWrapperBad.isRole("Admin")).toBeFalsy()
 })
+
+// Multi role tests
+it("accessHelper validate methods work with multi role", async () => {
+    const orgs = createOrgs(1, true)
+    const orgId = orgs[0].orgId
+    const fakeOrgId = "fakeOrgId"
+    const orgIdToOrgMemberInfo = createOrgIdToOrgMemberInfo(orgs)
+
+    const accessHelper = getAccessHelper(orgIdToOrgMemberInfo)
+
+    // org has the roles of "Role A", "Role B", and "Role C" in orgId
+    expect(accessHelper.isRole(orgId, "")).toBeFalsy()
+    expect(accessHelper.isRole(orgId, "Role D")).toBeFalsy()
+    expect(accessHelper.isRole(orgId, "Role A")).toBeTruthy()
+    expect(accessHelper.isRole(fakeOrgId, "Role A")).toBeFalsy()
+    expect(accessHelper.isRole(orgId, "Role B")).toBeTruthy()
+    expect(accessHelper.isRole(orgId, "Role C")).toBeTruthy()
+    
+    // isAtLeastRole should work the same as isRole for multi role
+    expect(accessHelper.isAtLeastRole(orgId, "")).toBeFalsy()
+    expect(accessHelper.isAtLeastRole(orgId, "Role D")).toBeFalsy()
+    expect(accessHelper.isAtLeastRole(orgId, "Role A")).toBeTruthy()
+    expect(accessHelper.isAtLeastRole(fakeOrgId, "Role A")).toBeFalsy()
+    expect(accessHelper.isAtLeastRole(orgId, "Role B")).toBeTruthy()
+    expect(accessHelper.isAtLeastRole(orgId, "Role C")).toBeTruthy()
+
+    // org has the permissions "read" and "write"
+    expect(accessHelper.hasPermission(orgId, "")).toBeFalsy()
+    expect(accessHelper.hasPermission(orgId, "read")).toBeTruthy()
+    expect(accessHelper.hasPermission(fakeOrgId, "read")).toBeFalsy()
+    expect(accessHelper.hasPermission(orgId, "write")).toBeTruthy()
+    expect(accessHelper.hasPermission(orgId, "delete")).toBeFalsy()
+
+    // org has the permissions "read" and "write"
+    expect(accessHelper.hasAllPermissions(orgId, [])).toBeTruthy()
+    expect(accessHelper.hasAllPermissions(orgId, [""])).toBeFalsy()
+    expect(accessHelper.hasAllPermissions(orgId, ["read"])).toBeTruthy()
+    expect(accessHelper.hasAllPermissions(fakeOrgId, ["read"])).toBeFalsy()
+    expect(accessHelper.hasAllPermissions(orgId, ["write"])).toBeTruthy()
+    expect(accessHelper.hasAllPermissions(orgId, ["delete"])).toBeFalsy()
+    expect(accessHelper.hasAllPermissions(orgId, ["read", "write"])).toBeTruthy()
+    expect(accessHelper.hasAllPermissions(orgId, ["read", "delete"])).toBeFalsy()
+    expect(accessHelper.hasAllPermissions(orgId, ["write", "delete"])).toBeFalsy()
+    expect(accessHelper.hasAllPermissions(orgId, ["read", "write", "delete"])).toBeFalsy()
+})
