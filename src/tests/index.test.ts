@@ -4,12 +4,15 @@
 import { createClient } from "../index"
 import { OrgIdToOrgMemberInfo } from "../org"
 import { ok, ResponseStatus, setupMockFetch, UnauthorizedResponse, UnknownErrorResponse } from "./mockfetch.test"
+import {DEFAULT_RETRIES} from "../fetch_retries";
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
 
 beforeAll(() => {
     jest.useFakeTimers("modern")
+    // @ts-ignore
+    global.setTimeout = jest.fn(cb => cb());
 })
 
 beforeEach(() => {
@@ -276,8 +279,10 @@ test("client continues to use cached value if the API fails and the value hasn't
     // The API will now fail, but that failure should be logged and not effect this method
     const { mockFetch: errorMockFetch } = setupMockFetchThatReturnsUnknownError()
     const newAuthenticationInfo = await client.getAuthenticationInfoOrNull()
+
     expect(newAuthenticationInfo?.accessToken).toBe(expectedAccessToken)
-    expectCorrectEndpointWasHit(errorMockFetch, "https://www.example.com/api/v1/refresh_token")
+    const numTimesCalled = 1 + DEFAULT_RETRIES
+    expectCorrectEndpointWasHit(errorMockFetch, "https://www.example.com/api/v1/refresh_token", numTimesCalled)
 })
 
 test("client cannot use cached value if the API fails and the value has expired", async () => {
@@ -410,6 +415,7 @@ test("if a new client is created and cannot get an access token, it should trigg
 
     const post401AuthenticationInfo1 = await client1.getAuthenticationInfoOrNull()
     expect(post401AuthenticationInfo1).toBeNull()
+    jest.useRealTimers()
     const post401AuthenticationInfo0 = await client0.getAuthenticationInfoOrNull()
     expect(post401AuthenticationInfo0).toBeNull()
 

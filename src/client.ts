@@ -1,5 +1,6 @@
 import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
 import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
+import {runWithRetriesOnAnyError} from "./fetch_retries";
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
@@ -271,7 +272,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     async function forceRefreshToken(returnCached: boolean): Promise<AuthenticationInfo | null> {
         try {
             // Happy case, we fetch auth info and save it
-            const authenticationInfo = await fetchAuthenticationInfo(clientState.authUrl)
+            const authenticationInfo = await runWithRetriesOnAnyError(() => fetchAuthenticationInfo(clientState.authUrl))
             setAuthenticationInfoAndUpdateDownstream(authenticationInfo)
             return authenticationInfo
         } catch (e) {
