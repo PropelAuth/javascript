@@ -1,4 +1,4 @@
-const DEFAULT_RETRIES = 3
+export const DEFAULT_RETRIES = 3
 
 export const runWithRetriesOnAnyError = async <T>(fn: () => Promise<T>): Promise<T> => {
     return runWithRetriesInner(fn, DEFAULT_RETRIES)
