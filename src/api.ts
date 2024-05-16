@@ -68,6 +68,12 @@ export function fetchAuthenticationInfo(authUrl: string, activeOrgId?: string): 
         },
     }).then((res) => {
         if (res.status === 401) {
+            if (!!activeOrgId && res.statusText === "user not in org") {
+                return Promise.reject({
+                    status: res.status,
+                    message: res.statusText,
+                })
+            }
             return null
         } else if (res.status === 0) {
             logCorsError()
