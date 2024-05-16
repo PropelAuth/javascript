@@ -1,11 +1,12 @@
 import { AuthenticationInfo, fetchAuthenticationInfo, logout } from "./api"
+import { runWithRetriesOnAnyError } from "./fetch_retries"
 import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow } from "./helpers"
-import {runWithRetriesOnAnyError} from "./fetch_retries";
 
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
 const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
 const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
+const ACTIVE_ORG_ACCESS_TOKEN_REFRESH_EXPIRATION_SECONDS = 60 * 5
 
 const encodeBase64 = (str: string) => {
     const encode = window ? window.btoa : btoa
@@ -37,6 +38,20 @@ export interface RedirectToOrgPageOptions {
 export interface RedirectToSetupSAMLPageOptions {
     redirectBackToUrl?: string
 }
+
+export type AccessTokenForActiveOrg =
+    | {
+          error: undefined
+          accessToken: string
+      }
+    | {
+          error: "user_not_in_org"
+          accessToken: null
+      }
+    | {
+          error: "unexpected_error"
+          accessToken: null
+      }
 
 export interface IAuthClient {
     /**
@@ -87,6 +102,11 @@ export interface IAuthClient {
      * Gets the URL for the hosted SAML configuration page.
      */
     getSetupSAMLPageUrl(orgId: string): string
+
+    /**
+     * Gets an access token for a specific organization, known as an Active Org.
+     */
+    getAccessTokenForActiveOrg(orgId: string): Promise<AccessTokenForActiveOrg>
 
     /**
      * Redirects the user to the signup page.
@@ -160,6 +180,13 @@ export interface IAuthOptions {
     enableBackgroundTokenRefresh?: boolean
 }
 
+interface AccessTokenActiveOrgMap {
+    [orgId: string]: {
+        accessToken: string
+        fetchedAt: number
+    } | null
+}
+
 interface ClientState {
     initialLoadFinished: boolean
     authenticationInfo: AuthenticationInfo | null
@@ -169,6 +196,7 @@ interface ClientState {
     lastLoggedOutAtMessage: number | null
     refreshInterval: number | null
     lastRefresh: number | null
+    accessTokenActiveOrgMap: AccessTokenActiveOrgMap
     readonly authUrl: string
 }
 
@@ -201,6 +229,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         authUrl: authOptions.authUrl,
         refreshInterval: null,
         lastRefresh: null,
+        accessTokenActiveOrgMap: {},
     }
 
     // Helper functions
@@ -248,6 +277,13 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         }
     }
 
+    /**
+     * Invalidates all org's access tokens.
+     */
+    function resetAccessTokenActiveOrgMap() {
+        clientState.accessTokenActiveOrgMap = {}
+    }
+
     function setAuthenticationInfoAndUpdateDownstream(authenticationInfo: AuthenticationInfo | null) {
         const previousAccessToken = clientState.authenticationInfo?.accessToken
         clientState.authenticationInfo = authenticationInfo
@@ -265,6 +301,8 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             notifyObserversOfAccessTokenChange(accessToken)
         }
 
+        resetAccessTokenActiveOrgMap()
+
         clientState.lastRefresh = currentTimeSeconds()
         clientState.initialLoadFinished = true
     }
@@ -272,7 +310,9 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     async function forceRefreshToken(returnCached: boolean): Promise<AuthenticationInfo | null> {
         try {
             // Happy case, we fetch auth info and save it
-            const authenticationInfo = await runWithRetriesOnAnyError(() => fetchAuthenticationInfo(clientState.authUrl))
+            const authenticationInfo = await runWithRetriesOnAnyError(() =>
+                fetchAuthenticationInfo(clientState.authUrl)
+            )
             setAuthenticationInfoAndUpdateDownstream(authenticationInfo)
             return authenticationInfo
         } catch (e) {
@@ -446,6 +486,60 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
                 return await forceRefreshToken(returnCached)
             } else {
                 return clientState.authenticationInfo
+            }
+        },
+
+        async getAccessTokenForActiveOrg(orgId: string): Promise<AccessTokenForActiveOrg> {
+            // First, check if there is a valid access token for the org ID in the
+            // valid time frame.
+            const currentTimeSecs = currentTimeSeconds()
+
+            const activeOrgAccessToken = clientState.accessTokenActiveOrgMap[orgId]
+            if (!!activeOrgAccessToken) {
+                if (
+                    currentTimeSecs <
+                    activeOrgAccessToken.fetchedAt + ACTIVE_ORG_ACCESS_TOKEN_REFRESH_EXPIRATION_SECONDS
+                ) {
+                    return {
+                        accessToken: activeOrgAccessToken.accessToken,
+                        error: undefined,
+                    }
+                }
+            }
+            // Fetch the access token for the org ID and update.
+            try {
+                const authenticationInfo = await runWithRetriesOnAnyError(() =>
+                    fetchAuthenticationInfo(clientState.authUrl, orgId)
+                )
+                if (!authenticationInfo) {
+                    return {
+                        error: "unexpected_error",
+                        accessToken: null,
+                    }
+                }
+                const { accessToken } = authenticationInfo
+                clientState.accessTokenActiveOrgMap[orgId] = {
+                    accessToken,
+                    fetchedAt: currentTimeSecs,
+                }
+                return {
+                    accessToken,
+                    error: undefined,
+                }
+            } catch (e: any) {
+                if (e["status"] && e["message"]) {
+                    if (e["message"] === "user not in org") {
+                        return {
+                            error: "user_not_in_org",
+                            accessToken: null,
+                        }
+                    }
+                }
+                console.error("Error fetching access token for org", e)
+            }
+            return {
+                error: "unexpected_error",
+                accessToken: null,
             }
         },
 

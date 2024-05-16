@@ -51,8 +51,16 @@ export type LogoutResponse = {
     redirect_to: string
 }
 
-export function fetchAuthenticationInfo(authUrl: string): Promise<AuthenticationInfo | null> {
-    return fetch(`${authUrl}/api/v1/refresh_token`, {
+export function fetchAuthenticationInfo(authUrl: string, activeOrgId?: string): Promise<AuthenticationInfo | null> {
+    const queryParams = new URLSearchParams()
+    if (activeOrgId) {
+        queryParams.append("active_org_id", activeOrgId)
+    }
+    let path = `${authUrl}/api/v1/refresh_token`
+    if (queryParams.toString()) {
+        path += `?${queryParams.toString()}`
+    }
+    return fetch(path, {
         method: "GET",
         credentials: "include",
         headers: {
