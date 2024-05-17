@@ -46,11 +46,11 @@ export type AccessTokenForActiveOrg =
       }
     | {
           error: "user_not_in_org"
-          accessToken: null
+          accessToken: never
       }
     | {
           error: "unexpected_error"
-          accessToken: null
+          accessToken: never
       }
 
 export interface IAuthClient {
@@ -184,7 +184,7 @@ interface AccessTokenActiveOrgMap {
     [orgId: string]: {
         accessToken: string
         fetchedAt: number
-    } | null
+    }
 }
 
 interface ClientState {
@@ -512,9 +512,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
                     fetchAuthenticationInfo(clientState.authUrl, orgId)
                 )
                 if (!authenticationInfo) {
+                    // Only null if 401 unauthorized.
                     return {
-                        error: "unexpected_error",
-                        accessToken: null,
+                        error: "user_not_in_org",
+                        accessToken: null as never,
                     }
                 }
                 const { accessToken } = authenticationInfo
@@ -526,20 +527,11 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
                     accessToken,
                     error: undefined,
                 }
-            } catch (e: any) {
-                if (e["status"] && e["message"]) {
-                    if (e["message"] === "user not in org") {
-                        return {
-                            error: "user_not_in_org",
-                            accessToken: null,
-                        }
-                    }
+            } catch (e) {
+                return {
+                    error: "unexpected_error",
+                    accessToken: null as never,
                 }
-                console.error("Error fetching access token for org", e)
-            }
-            return {
-                error: "unexpected_error",
-                accessToken: null,
             }
         },
 
