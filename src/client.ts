@@ -106,7 +106,7 @@ export interface IAuthClient {
     /**
      * Gets an access token for a specific organization, known as an Active Org.
      */
-    getAccessTokenForActiveOrg(orgId: string): Promise<AccessTokenForActiveOrg>
+    getAccessTokenForOrg(orgId: string): Promise<AccessTokenForActiveOrg>
 
     /**
      * Redirects the user to the signup page.
@@ -489,7 +489,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
         },
 
-        async getAccessTokenForActiveOrg(orgId: string): Promise<AccessTokenForActiveOrg> {
+        async getAccessTokenForOrg(orgId: string): Promise<AccessTokenForActiveOrg> {
             // First, check if there is a valid access token for the org ID in the
             // valid time frame.
             const currentTimeSecs = currentTimeSeconds()
