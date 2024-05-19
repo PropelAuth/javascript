@@ -2,6 +2,7 @@ export type { AccessHelper, AccessHelperWithOrg } from "./access_helper"
 export type { AuthenticationInfo, User } from "./api"
 export { createClient } from "./client"
 export type {
+    AccessTokenForActiveOrg,
     IAuthClient,
     IAuthOptions,
     RedirectToAccountOptions,
