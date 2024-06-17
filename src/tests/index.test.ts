@@ -1,10 +1,10 @@
 /**
  * @jest-environment jsdom
  */
+import { DEFAULT_RETRIES } from "../fetch_retries"
 import { createClient } from "../index"
 import { OrgIdToOrgMemberInfo } from "../org"
 import { ok, ResponseStatus, setupMockFetch, UnauthorizedResponse, UnknownErrorResponse } from "./mockfetch.test"
-import {DEFAULT_RETRIES} from "../fetch_retries";
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
@@ -12,7 +12,7 @@ const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
 beforeAll(() => {
     jest.useFakeTimers("modern")
     // @ts-ignore
-    global.setTimeout = jest.fn(cb => cb());
+    global.setTimeout = jest.fn((cb) => cb())
 })
 
 beforeEach(() => {
@@ -97,6 +97,12 @@ test("client works without ending slash", async () => {
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo?.accessToken).toBe(expectedAccessToken)
     expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token")
+})
+
+test("client gets auth URL back correctly", async () => {
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    expect(client.getAuthUrl()).toBe("https://www.example.com")
 })
 
 test("client parses user correctly", async () => {

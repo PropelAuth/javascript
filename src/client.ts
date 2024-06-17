@@ -163,6 +163,11 @@ export interface IAuthClient {
      * Cleanup the auth client if you no longer need it.
      */
     destroy(): void
+
+    /**
+     * Gets the auth URL.
+     */
+    getAuthUrl(): string
 }
 
 export interface IAuthOptions {
@@ -598,6 +603,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             if (clientState.refreshInterval) {
                 clearInterval(clientState.refreshInterval)
             }
+        },
+
+        getAuthUrl() {
+            return authOptions.authUrl
         },
     }
 
