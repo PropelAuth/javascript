@@ -5,7 +5,7 @@ import { currentTimeSeconds, getLocalStorageNumber, hasLocalStorage, hasWindow }
 const LOGGED_IN_AT_KEY = "__PROPEL_AUTH_LOGGED_IN_AT"
 const LOGGED_OUT_AT_KEY = "__PROPEL_AUTH_LOGGED_OUT_AT"
 const AUTH_TOKEN_REFRESH_BEFORE_EXPIRATION_SECONDS = 10 * 60
-const DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS = 60
+const DEFAULT_MIN_SECONDS_BEFORE_REFRESH = 60 * 2
 const ACTIVE_ORG_ACCESS_TOKEN_REFRESH_EXPIRATION_SECONDS = 60 * 5
 
 const encodeBase64 = (str: string) => {
@@ -178,6 +178,12 @@ export interface IAuthOptions {
      * Default true
      */
     enableBackgroundTokenRefresh?: boolean
+
+    /**
+     * Minimum number of seconds before refreshing the token again.
+     * Defaults to 120 seconds.
+     */
+    minSecondsBeforeRefresh?: number
 }
 
 interface AccessTokenActiveOrgMap {
@@ -216,6 +222,8 @@ function validateAndCleanupOptions(authOptions: IAuthOptions) {
 }
 
 export function createClient(authOptions: IAuthOptions): IAuthClient {
+    const { minSecondsBeforeRefresh = DEFAULT_MIN_SECONDS_BEFORE_REFRESH } = authOptions
+
     validateAndCleanupOptions(authOptions)
 
     // Internal state
@@ -631,10 +639,7 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     // If we were offline or on a different tab, when we return, refetch auth info
     // Some browsers trigger focus more often than we'd like, so we'll debounce a little here as well
     const onOnlineOrFocus = async function () {
-        if (
-            clientState.lastRefresh &&
-            currentTimeSeconds() > clientState.lastRefresh + DEBOUNCE_DURATION_FOR_REFOCUS_SECONDS
-        ) {
+        if (clientState.lastRefresh && currentTimeSeconds() > clientState.lastRefresh + minSecondsBeforeRefresh) {
             await forceRefreshToken(true)
         } else {
             await client.getAuthenticationInfoOrNull()
