@@ -112,7 +112,7 @@ test("client parses user correctly", async () => {
 
 test("client parses org information correctly", async () => {
     const expiresAtSeconds = INITIAL_TIME_SECONDS + 60 * 30
-    const apiOrgIdToOrgMemberInfo = {
+    const apiOrgIdToOrgMemberInfo: ApiOrgIdToOrgMemberInfo = {
         "922c5c21-be96-484f-9383-ee532dd79d02": {
             org_id: "922c5c21-be96-484f-9383-ee532dd79d02",
             org_name: "ninetwotwo",
@@ -120,6 +120,7 @@ test("client parses org information correctly", async () => {
             user_role: "Owner",
             inherited_user_roles_plus_current_role: ["Owner", "Admin", "Member"],
             user_permissions: ["View", "Edit", "Delete", "ManageAccess"],
+            legacy_org_id: "ce126279-48a2-4fc4-a9e5-da62a33d1b11"
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             org_id: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
@@ -146,6 +147,7 @@ test("client parses org information correctly", async () => {
             userAssignedRole: "Owner",
             userInheritedRolesPlusCurrentRole: ["Owner", "Admin", "Member"],
             userPermissions: ["View", "Edit", "Delete", "ManageAccess"],
+            legacyOrgId: "ce126279-48a2-4fc4-a9e5-da62a33d1b11"
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             orgId: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
@@ -457,6 +459,7 @@ export type ApiOrgMemberInfo = {
     user_role: string
     inherited_user_roles_plus_current_role: string[]
     user_permissions: string[]
+    legacy_org_id?: string
 }
 export type ApiOrgIdToOrgMemberInfo = {
     [org_id: string]: ApiOrgMemberInfo
