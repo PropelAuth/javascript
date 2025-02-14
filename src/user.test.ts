@@ -8,7 +8,8 @@ const mockUserOrgInfo = new OrgMemberInfoClass(
     "mock-org-name",
     "Admin",
     ["Admin", "Member"],
-    ["user::create", "user::delete"]
+    ["user::create", "user::delete"],
+    "mockLegacyOrgId"
 )
 
 const mockUser = new UserClass(
@@ -110,6 +111,7 @@ const mockUserOrgInfoMultiRole = new OrgMemberInfoClass(
     "Role A",
     ["Role A"],
     ["user::create", "user::delete"],
+    "mockLegacyOrgId",
     OrgRoleStructure.MultiRole,
     ["Role B", "Role C"],
 )

@@ -177,6 +177,7 @@ export interface OrgIdToOrgMemberInfoClass {
 export class OrgMemberInfoClass {
     public orgId: string
     public orgName: string
+    public legacyOrgId?: string
     public orgMetadata: { [key: string]: any }
     public urlSafeOrgName: string
     public orgRoleStructure: OrgRoleStructure
@@ -194,11 +195,13 @@ export class OrgMemberInfoClass {
         userAssignedRole: string,
         userInheritedRolesPlusCurrentRole: string[],
         userPermissions: string[],
+        legacyOrgId?: string,
         orgRoleStructure?: OrgRoleStructure,
         userAssignedAdditionalRoles?: string[]
     ) {
         this.orgId = orgId
         this.orgName = orgName
+        this.legacyOrgId = legacyOrgId
         this.orgMetadata = orgMetadata
         this.urlSafeOrgName = urlSafeOrgName
         this.orgRoleStructure = orgRoleStructure ?? OrgRoleStructure.SingleRole
@@ -245,6 +248,7 @@ export class OrgMemberInfoClass {
                 obj.userAssignedRole,
                 obj.userInheritedRolesPlusCurrentRole,
                 obj.userPermissions,
+                obj.legacyOrgId,
                 obj.orgRoleStructure,
                 obj.userAssignedAdditionalRoles
             )
@@ -274,6 +278,7 @@ export function convertOrgIdToOrgMemberInfo(
             orgMemberInfo.userAssignedRole,
             orgMemberInfo.userInheritedRolesPlusCurrentRole,
             orgMemberInfo.userPermissions,
+            orgMemberInfo.legacyOrgId,
             orgMemberInfo.orgRoleStructure,
             orgMemberInfo.userAssignedAdditionalRoles
         )

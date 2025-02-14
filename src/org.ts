@@ -11,7 +11,7 @@ export type OrgMemberInfo = {
     userInheritedRolesPlusCurrentRole: string[]
     userPermissions: string[]
     userAssignedAdditionalRoles: string[]
-    legacyOrgId: string
+    legacyOrgId?: string
 }
 export type OrgIdToOrgMemberInfo = {
     [orgId: string]: OrgMemberInfo
