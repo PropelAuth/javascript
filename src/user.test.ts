@@ -1,5 +1,5 @@
 import { OrgRoleStructure } from "./org"
-import { UserClass, OrgMemberInfoClass } from "./user"
+import { OrgMemberInfoClass, UserClass } from "./user"
 
 const mockUserOrgInfo = new OrgMemberInfoClass(
     "mockOrgId",
@@ -9,6 +9,8 @@ const mockUserOrgInfo = new OrgMemberInfoClass(
     "Admin",
     ["Admin", "Member"],
     ["user::create", "user::delete"],
+    undefined,
+    undefined,
     "mockLegacyOrgId"
 )
 
@@ -111,9 +113,9 @@ const mockUserOrgInfoMultiRole = new OrgMemberInfoClass(
     "Role A",
     ["Role A"],
     ["user::create", "user::delete"],
-    "mockLegacyOrgId",
     OrgRoleStructure.MultiRole,
     ["Role B", "Role C"],
+    "mockLegacyOrgId"
 )
 
 const mockUserMultiRole = new UserClass(
@@ -205,7 +207,9 @@ describe("User multi-role", () => {
             expect(mockUserOrgInfoMultiRole.hasAllPermissions(["user::create", "user::update"])).toEqual(false)
         })
         it("should parse a org member info from JSON string", () => {
-            expect(OrgMemberInfoClass.fromJSON(JSON.stringify(mockUserOrgInfoMultiRole))).toEqual(mockUserOrgInfoMultiRole)
+            expect(OrgMemberInfoClass.fromJSON(JSON.stringify(mockUserOrgInfoMultiRole))).toEqual(
+                mockUserOrgInfoMultiRole
+            )
             expect(() => OrgMemberInfoClass.fromJSON("invalid json")).toThrowError()
         })
     })
