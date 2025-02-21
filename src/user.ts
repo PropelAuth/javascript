@@ -195,9 +195,9 @@ export class OrgMemberInfoClass {
         userAssignedRole: string,
         userInheritedRolesPlusCurrentRole: string[],
         userPermissions: string[],
-        legacyOrgId?: string,
         orgRoleStructure?: OrgRoleStructure,
-        userAssignedAdditionalRoles?: string[]
+        userAssignedAdditionalRoles?: string[],
+        legacyOrgId?: string
     ) {
         this.orgId = orgId
         this.orgName = orgName
@@ -248,9 +248,9 @@ export class OrgMemberInfoClass {
                 obj.userAssignedRole,
                 obj.userInheritedRolesPlusCurrentRole,
                 obj.userPermissions,
-                obj.legacyOrgId,
                 obj.orgRoleStructure,
-                obj.userAssignedAdditionalRoles
+                obj.userAssignedAdditionalRoles,
+                obj.legacyOrgId
             )
         } catch (e) {
             console.error(
@@ -278,9 +278,9 @@ export function convertOrgIdToOrgMemberInfo(
             orgMemberInfo.userAssignedRole,
             orgMemberInfo.userInheritedRolesPlusCurrentRole,
             orgMemberInfo.userPermissions,
-            orgMemberInfo.legacyOrgId,
             orgMemberInfo.orgRoleStructure,
-            orgMemberInfo.userAssignedAdditionalRoles
+            orgMemberInfo.userAssignedAdditionalRoles,
+            orgMemberInfo.legacyOrgId
         )
     }
     return orgIdToUserOrgInfo
