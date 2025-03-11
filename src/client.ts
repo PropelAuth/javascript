@@ -184,6 +184,13 @@ export interface IAuthOptions {
      * Defaults to 120 seconds.
      */
     minSecondsBeforeRefresh?: number
+
+    /**
+     * If true, disables the token refresh when the tab regains focus.
+     *
+     * Default false
+     */
+    disableRefreshOnFocus?: boolean
 }
 
 interface AccessTokenActiveOrgMap {
@@ -603,6 +610,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             clientState.observers = []
             clientState.accessTokenObservers = []
             window.removeEventListener("storage", onStorageChange)
+            window.removeEventListener("online", onOnlineOrFocus)
+            if (!authOptions.disableRefreshOnFocus) {
+                window.removeEventListener("focus", onOnlineOrFocus)
+            }
             if (clientState.refreshInterval) {
                 clearInterval(clientState.refreshInterval)
             }
@@ -649,7 +660,10 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     if (hasWindow()) {
         window.addEventListener("storage", onStorageChange)
         window.addEventListener("online", onOnlineOrFocus)
-        window.addEventListener("focus", onOnlineOrFocus)
+
+        if (!authOptions.disableRefreshOnFocus) {
+            window.addEventListener("focus", onOnlineOrFocus)
+        }
 
         if (authOptions.enableBackgroundTokenRefresh) {
             client.getAuthenticationInfoOrNull()
