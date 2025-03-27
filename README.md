@@ -32,10 +32,10 @@ import { createClient } from "@propelauth/javascript";
 Alternatively, you can use a CDN:
 
 ```html
-<script 
-    src="https://www.unpkg.com/@propelauth/javascript@2.0.11/dist/javascript.min.js" 
-    integrity="sha384-FENNH2f7QuQvkZJBL7jebLr0OtYKgTA2iq+C5g3VXXX7SBwWmeMMoc+pBBtcn76G" 
-    crossorigin="anonymous"></script>
+<script
+  src="https://www.unpkg.com/@propelauth/javascript/dist/javascript.min.js"
+  crossorigin="anonymous"
+></script>
 ```
 
 then a global PropelAuth object will be created, and you can call createClient from it:
