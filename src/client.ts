@@ -191,6 +191,14 @@ export interface IAuthOptions {
      * Default false
      */
     disableRefreshOnFocus?: boolean
+
+    /**
+     * If true, disables the token refresh on initial page load.
+     * Can help reduce duplicate token refresh requests.
+     * 
+     * Default false
+     */
+    skipInitialFetch?: boolean
 }
 
 interface AccessTokenActiveOrgMap {
@@ -666,7 +674,9 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         }
 
         if (authOptions.enableBackgroundTokenRefresh) {
-            client.getAuthenticationInfoOrNull()
+            if (!authOptions.skipInitialFetch) {
+                client.getAuthenticationInfoOrNull()
+            }
             clientState.refreshInterval = window.setInterval(client.getAuthenticationInfoOrNull, 60000)
         }
     }
