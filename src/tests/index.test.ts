@@ -69,6 +69,44 @@ afterAll(() => {
     jest.useRealTimers()
 })
 
+test("getAuthOptions returns defaults when no options provided", () => {
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    const options = client.getAuthOptions()
+
+    expect(options.authUrl).toBe("https://www.example.com")
+    expect(options.enableBackgroundTokenRefresh).toBe(false)
+    expect(options.minSecondsBeforeRefresh).toBe(120)
+    expect(options.disableRefreshOnFocus).toBe(false)
+    expect(options.skipInitialFetch).toBe(false)
+})
+
+test("getAuthOptions returns user-provided values", () => {
+    let client = createClient({
+        authUrl: "https://www.example.com",
+        enableBackgroundTokenRefresh: false,
+        minSecondsBeforeRefresh: 300,
+        disableRefreshOnFocus: true,
+        skipInitialFetch: true,
+    })
+
+    const options = client.getAuthOptions()
+
+    expect(options.authUrl).toBe("https://www.example.com")
+    expect(options.enableBackgroundTokenRefresh).toBe(false)
+    expect(options.minSecondsBeforeRefresh).toBe(300)
+    expect(options.disableRefreshOnFocus).toBe(true)
+    expect(options.skipInitialFetch).toBe(true)
+})
+
+test("getAuthOptions returns normalized authUrl", () => {
+    let client = createClient({ authUrl: "https://www.example.com/path/to/something", enableBackgroundTokenRefresh: false })
+
+    const options = client.getAuthOptions()
+
+    expect(options.authUrl).toBe("https://www.example.com")
+})
+
 test("cannot create client without auth url origin", () => {
     expect(() => {
         createClient({ authUrl: "" })

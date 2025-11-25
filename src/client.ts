@@ -163,6 +163,11 @@ export interface IAuthClient {
      * Cleanup the auth client if you no longer need it.
      */
     destroy(): void
+
+    /**
+     * Returns the auth options with all default values filled in.
+     */
+    getAuthOptions(): IResolvedAuthOptions
 }
 
 export interface IAuthOptions {
@@ -195,10 +200,18 @@ export interface IAuthOptions {
     /**
      * If true, disables the token refresh on initial page load.
      * Can help reduce duplicate token refresh requests.
-     * 
+     *
      * Default false
      */
     skipInitialFetch?: boolean
+}
+
+export interface IResolvedAuthOptions {
+    authUrl: string
+    enableBackgroundTokenRefresh: boolean
+    minSecondsBeforeRefresh: number
+    disableRefreshOnFocus: boolean
+    skipInitialFetch: boolean
 }
 
 interface AccessTokenActiveOrgMap {
@@ -624,6 +637,16 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
             if (clientState.refreshInterval) {
                 clearInterval(clientState.refreshInterval)
+            }
+        },
+
+        getAuthOptions(): IResolvedAuthOptions {
+            return {
+                authUrl: clientState.authUrl,
+                enableBackgroundTokenRefresh: authOptions.enableBackgroundTokenRefresh!,
+                minSecondsBeforeRefresh: minSecondsBeforeRefresh,
+                disableRefreshOnFocus: authOptions.disableRefreshOnFocus ?? false,
+                skipInitialFetch: authOptions.skipInitialFetch ?? false,
             }
         },
     }
