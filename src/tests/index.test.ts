@@ -1,10 +1,10 @@
 /**
  * @jest-environment jsdom
  */
+import { DEFAULT_RETRIES } from "../fetch_retries"
 import { createClient } from "../index"
 import { OrgIdToOrgMemberInfo } from "../org"
 import { ok, ResponseStatus, setupMockFetch, UnauthorizedResponse, UnknownErrorResponse } from "./mockfetch.test"
-import {DEFAULT_RETRIES} from "../fetch_retries";
 
 const INITIAL_TIME_MILLIS = 1619743452595
 const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
@@ -12,7 +12,7 @@ const INITIAL_TIME_SECONDS = INITIAL_TIME_MILLIS / 1000
 beforeAll(() => {
     jest.useFakeTimers("modern")
     // @ts-ignore
-    global.setTimeout = jest.fn(cb => cb());
+    global.setTimeout = jest.fn((cb) => cb())
 })
 
 beforeEach(() => {
@@ -100,7 +100,10 @@ test("getAuthOptions returns user-provided values", () => {
 })
 
 test("getAuthOptions returns normalized authUrl", () => {
-    let client = createClient({ authUrl: "https://www.example.com/path/to/something", enableBackgroundTokenRefresh: false })
+    let client = createClient({
+        authUrl: "https://www.example.com/path/to/something",
+        enableBackgroundTokenRefresh: false,
+    })
 
     const options = client.getAuthOptions()
 
@@ -158,7 +161,7 @@ test("client parses org information correctly", async () => {
             user_role: "Owner",
             inherited_user_roles_plus_current_role: ["Owner", "Admin", "Member"],
             user_permissions: ["View", "Edit", "Delete", "ManageAccess"],
-            legacy_org_id: "ce126279-48a2-4fc4-a9e5-da62a33d1b11"
+            legacy_org_id: "ce126279-48a2-4fc4-a9e5-da62a33d1b11",
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             org_id: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
@@ -185,7 +188,7 @@ test("client parses org information correctly", async () => {
             userAssignedRole: "Owner",
             userInheritedRolesPlusCurrentRole: ["Owner", "Admin", "Member"],
             userPermissions: ["View", "Edit", "Delete", "ManageAccess"],
-            legacyOrgId: "ce126279-48a2-4fc4-a9e5-da62a33d1b11"
+            legacyOrgId: "ce126279-48a2-4fc4-a9e5-da62a33d1b11",
         },
         "fcdb21f0-b1b6-426f-b83c-6cf4b903d737": {
             orgId: "fcdb21f0-b1b6-426f-b83c-6cf4b903d737",
@@ -221,6 +224,105 @@ test("client returns null on a 401", async () => {
     const authenticationInfo = await client.getAuthenticationInfoOrNull()
     expect(authenticationInfo).toBeNull()
     expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token")
+})
+
+test("after concurrent getAuthenticationInfoOrNull calls complete, a new call makes a new HTTP request", async () => {
+    const { mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    // Make concurrent calls and wait for them to complete
+    await Promise.all([
+        client.getAuthenticationInfoOrNull(true),
+        client.getAuthenticationInfoOrNull(true),
+        client.getAuthenticationInfoOrNull(true),
+    ])
+
+    // First batch should have made 1 request
+    expect(mockFetch).toBeCalledTimes(1)
+
+    // Now make another call - this should make a new HTTP request since the previous one completed
+    await client.getAuthenticationInfoOrNull(true)
+
+    // Should now have 2 total requests
+    expect(mockFetch).toBeCalledTimes(2)
+})
+
+test("after concurrent getAccessTokenForOrg calls complete, a new call makes a new HTTP request", async () => {
+    const { mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    const orgId = "test-org-123"
+
+    // Make concurrent calls and wait for them to complete
+    await Promise.all([
+        client.getAccessTokenForOrg(orgId),
+        client.getAccessTokenForOrg(orgId),
+        client.getAccessTokenForOrg(orgId),
+    ])
+
+    // First batch should have made 1 request
+    expect(mockFetch).toBeCalledTimes(1)
+
+    // Advance time past the cache expiration so a new request is needed
+    const newTime = INITIAL_TIME_MILLIS + ACTIVE_ORG_ACCESS_TOKEN_REFRESH_EXPIRATION_SECONDS * 1000 + 1000
+    jest.setSystemTime(newTime)
+
+    // Now make another call - this should make a new HTTP request
+    await client.getAccessTokenForOrg(orgId)
+
+    // Should now have 2 total requests
+    expect(mockFetch).toBeCalledTimes(2)
+})
+
+// Constant needed for the test above
+const ACTIVE_ORG_ACCESS_TOKEN_REFRESH_EXPIRATION_SECONDS = 60 * 5
+
+test("concurrent calls to getAccessTokenForOrg make only one HTTP request per org", async () => {
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    const orgId = "test-org-123"
+
+    // Make 3 concurrent calls for the same org - these should all share the same in-flight request
+    const promises = [
+        client.getAccessTokenForOrg(orgId),
+        client.getAccessTokenForOrg(orgId),
+        client.getAccessTokenForOrg(orgId),
+    ]
+    const results = await Promise.all(promises)
+
+    // All should return the same result
+    expect(results[0].accessToken).toBe(expectedAccessToken)
+    expect(results[1].accessToken).toBe(expectedAccessToken)
+    expect(results[2].accessToken).toBe(expectedAccessToken)
+
+    // Only one HTTP request should have been made
+    expect(mockFetch).toBeCalledTimes(1)
+    expect(mockFetch).toHaveBeenCalledWith(
+        `https://www.example.com/api/v1/refresh_token?active_org_id=${orgId}`,
+        expect.objectContaining({ method: "GET" })
+    )
+})
+
+test("concurrent calls to getAuthenticationInfoOrNull make only one HTTP request", async () => {
+    const { expectedAccessToken, mockFetch } = setupMockFetchThatReturnsAccessToken()
+    let client = createClient({ authUrl: "https://www.example.com", enableBackgroundTokenRefresh: false })
+
+    // Make 3 concurrent calls - these should all share the same in-flight request
+    const promises = [
+        client.getAuthenticationInfoOrNull(),
+        client.getAuthenticationInfoOrNull(),
+        client.getAuthenticationInfoOrNull(),
+    ]
+    const results = await Promise.all(promises)
+
+    // All should return the same result
+    expect(results[0]?.accessToken).toBe(expectedAccessToken)
+    expect(results[1]?.accessToken).toBe(expectedAccessToken)
+    expect(results[2]?.accessToken).toBe(expectedAccessToken)
+
+    // Only one HTTP request should have been made
+    expectCorrectEndpointWasHit(mockFetch, "https://www.example.com/api/v1/refresh_token", 1)
 })
 
 test("repeated calls to getAuthenticationInfo do NOT make multiple http requests if the expiration is far in the future", async () => {
@@ -459,8 +561,8 @@ test("if a new client is created and cannot get an access token, it should trigg
     const post401AuthenticationInfo0 = await client0.getAuthenticationInfoOrNull()
     expect(post401AuthenticationInfo0).toBeNull()
 
-    // Called 3 times because client0 ends up making 2 requests, 1 when client1 triggers a logout event and 1 when asked
-    expectCorrectEndpointWasHit(logoutMockFetch, "https://www.example.com/api/v1/refresh_token", 3)
+    // Called 2 times: 1 from client1, 1 from client0 (the storage-triggered request is reused by the explicit call)
+    expectCorrectEndpointWasHit(logoutMockFetch, "https://www.example.com/api/v1/refresh_token", 2)
 })
 
 function expectCorrectEndpointWasHit(mockFetch: any, correctRefreshUrl: string, numSendTimes = 1, method = "get") {
