@@ -5,6 +5,7 @@ export type {
     AccessTokenForActiveOrg,
     IAuthClient,
     IAuthOptions,
+    IResolvedAuthOptions,
     RedirectToAccountOptions,
     RedirectToCreateOrgOptions,
     RedirectToLoginOptions,

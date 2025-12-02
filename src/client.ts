@@ -163,6 +163,11 @@ export interface IAuthClient {
      * Cleanup the auth client if you no longer need it.
      */
     destroy(): void
+
+    /**
+     * Returns the auth options with all default values filled in.
+     */
+    getAuthOptions(): IResolvedAuthOptions
 }
 
 export interface IAuthOptions {
@@ -195,10 +200,18 @@ export interface IAuthOptions {
     /**
      * If true, disables the token refresh on initial page load.
      * Can help reduce duplicate token refresh requests.
-     * 
+     *
      * Default false
      */
     skipInitialFetch?: boolean
+}
+
+export interface IResolvedAuthOptions {
+    authUrl: string
+    enableBackgroundTokenRefresh: boolean
+    minSecondsBeforeRefresh: number
+    disableRefreshOnFocus: boolean
+    skipInitialFetch: boolean
 }
 
 interface AccessTokenActiveOrgMap {
@@ -218,6 +231,8 @@ interface ClientState {
     refreshInterval: number | null
     lastRefresh: number | null
     accessTokenActiveOrgMap: AccessTokenActiveOrgMap
+    pendingAuthRequest: Promise<AuthenticationInfo | null> | null
+    pendingOrgAccessTokenRequests: Map<string, Promise<AccessTokenForActiveOrg>>
     readonly authUrl: string
 }
 
@@ -253,6 +268,8 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
         refreshInterval: null,
         lastRefresh: null,
         accessTokenActiveOrgMap: {},
+        pendingAuthRequest: null,
+        pendingOrgAccessTokenRequests: new Map(),
     }
 
     // Helper functions
@@ -331,23 +348,35 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
     }
 
     async function forceRefreshToken(returnCached: boolean): Promise<AuthenticationInfo | null> {
-        try {
-            // Happy case, we fetch auth info and save it
-            const authenticationInfo = await runWithRetriesOnAnyError(() =>
-                fetchAuthenticationInfo(clientState.authUrl)
-            )
-            setAuthenticationInfoAndUpdateDownstream(authenticationInfo)
-            return authenticationInfo
-        } catch (e) {
-            // If there was an error, we sometimes still want to return the value we have cached
-            //   (e.g. if we were prefetching), so in those cases we swallow the exception
-            if (returnCached) {
-                return clientState.authenticationInfo
-            } else {
-                setAuthenticationInfoAndUpdateDownstream(null)
-                throw e
-            }
+        // If there's already an in-flight request, return it to avoid duplicate fetches
+        if (clientState.pendingAuthRequest) {
+            return clientState.pendingAuthRequest
         }
+
+        const request = (async () => {
+            try {
+                // Happy case, we fetch auth info and save it
+                const authenticationInfo = await runWithRetriesOnAnyError(() =>
+                    fetchAuthenticationInfo(clientState.authUrl)
+                )
+                setAuthenticationInfoAndUpdateDownstream(authenticationInfo)
+                return authenticationInfo
+            } catch (e) {
+                // If there was an error, we sometimes still want to return the value we have cached
+                //   (e.g. if we were prefetching), so in those cases we swallow the exception
+                if (returnCached) {
+                    return clientState.authenticationInfo
+                } else {
+                    setAuthenticationInfoAndUpdateDownstream(null)
+                    throw e
+                }
+            } finally {
+                clientState.pendingAuthRequest = null
+            }
+        })()
+
+        clientState.pendingAuthRequest = request
+        return request
     }
 
     const getSignupPageUrl = (options?: RedirectToSignupOptions) => {
@@ -529,33 +558,47 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
                     }
                 }
             }
-            // Fetch the access token for the org ID and update.
-            try {
-                const authenticationInfo = await runWithRetriesOnAnyError(() =>
-                    fetchAuthenticationInfo(clientState.authUrl, orgId)
-                )
-                if (!authenticationInfo) {
-                    // Only null if 401 unauthorized.
+
+            // Check for in-flight request for this org to avoid duplicate fetches
+            const pendingRequest = clientState.pendingOrgAccessTokenRequests.get(orgId)
+            if (pendingRequest) {
+                return pendingRequest
+            }
+
+            // Create new request and store it
+            const request = (async (): Promise<AccessTokenForActiveOrg> => {
+                try {
+                    const authenticationInfo = await runWithRetriesOnAnyError(() =>
+                        fetchAuthenticationInfo(clientState.authUrl, orgId)
+                    )
+                    if (!authenticationInfo) {
+                        // Only null if 401 unauthorized.
+                        return {
+                            error: "user_not_in_org",
+                            accessToken: null as never,
+                        }
+                    }
+                    const { accessToken } = authenticationInfo
+                    clientState.accessTokenActiveOrgMap[orgId] = {
+                        accessToken,
+                        fetchedAt: currentTimeSecs,
+                    }
                     return {
-                        error: "user_not_in_org",
+                        accessToken,
+                        error: undefined,
+                    }
+                } catch (e) {
+                    return {
+                        error: "unexpected_error",
                         accessToken: null as never,
                     }
+                } finally {
+                    clientState.pendingOrgAccessTokenRequests.delete(orgId)
                 }
-                const { accessToken } = authenticationInfo
-                clientState.accessTokenActiveOrgMap[orgId] = {
-                    accessToken,
-                    fetchedAt: currentTimeSecs,
-                }
-                return {
-                    accessToken,
-                    error: undefined,
-                }
-            } catch (e) {
-                return {
-                    error: "unexpected_error",
-                    accessToken: null as never,
-                }
-            }
+            })()
+
+            clientState.pendingOrgAccessTokenRequests.set(orgId, request)
+            return request
         },
 
         getSignupPageUrl(options?: RedirectToSignupOptions): string {
@@ -624,6 +667,16 @@ export function createClient(authOptions: IAuthOptions): IAuthClient {
             }
             if (clientState.refreshInterval) {
                 clearInterval(clientState.refreshInterval)
+            }
+        },
+
+        getAuthOptions(): IResolvedAuthOptions {
+            return {
+                authUrl: clientState.authUrl,
+                enableBackgroundTokenRefresh: authOptions.enableBackgroundTokenRefresh!,
+                minSecondsBeforeRefresh: minSecondsBeforeRefresh,
+                disableRefreshOnFocus: authOptions.disableRefreshOnFocus ?? false,
+                skipInitialFetch: authOptions.skipInitialFetch ?? false,
             }
         },
     }
